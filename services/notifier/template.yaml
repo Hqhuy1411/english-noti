@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Notifier service -- sends the English-learning reminder to Telegram.
+  Deployed once per environment as a nested stack from the root template.
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    AllowedValues: [prod, test]
+    Description: >
+      Suffixes every resource name so prod and test can coexist in one account,
+      and is passed to the function so the message says which one sent it.
+
+  TelegramChatId:
+    Type: String
+    Description: Telegram chat id to send the reminder to (not a secret).
+
+  ScheduleExpression:
+    Type: String
+    Description: >
+      cron(...) for a recurring schedule, or at(yyyy-mm-ddThh:mm:ss) for a
+      one-shot. Interpreted in Asia/Ho_Chi_Minh. A parameter so the schedule can
+      be re-armed or smoke-tested without editing this file.
+
+  ScheduleState:
+    Type: String
+    Default: ENABLED
+    AllowedValues: [ENABLED, DISABLED]
+    Description: Set DISABLED to keep the function deployed but never auto-fire.
+
+  LogRetentionDays:
+    Type: Number
+    Default: 30
+    Description: CloudWatch Logs retention, in days.
+
+  TokenParameterName:
+    Type: String
+    Default: /english-reminder/telegram-bot-token
+    Description: >
+      SSM Parameter Store path holding the bot token as a SecureString.
+      Created out-of-band so the secret never enters this template.
+
+Resources:
+  # Declared explicitly rather than letting Lambda auto-create it, so retention
+  # is managed by the stack and deleting the stack deletes the logs.
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/english-reminder-notifier-${EnvironmentName}
+      RetentionInDays: !Ref LogRetentionDays
+
+  NotifierFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: LogGroup
+    Properties:
+      # Set explicitly so the log group name above is predictable.
+      FunctionName: !Sub english-reminder-notifier-${EnvironmentName}
+      Description: !Sub Sends the English-learning reminder to Telegram (${EnvironmentName}).
+      CodeUri: src/
+      Handler: handler.handler
+      Runtime: nodejs22.x
+      Architectures:
+        - arm64
+      Timeout: 15
+      MemorySize: 256
+      Environment:
+        Variables:
+          TELEGRAM_CHAT_ID: !Ref TelegramChatId
+          SSM_TOKEN_PARAM: !Ref TokenParameterName
+          ENVIRONMENT: !Ref EnvironmentName
+      Policies:
+        # Least-privilege: read access scoped to this app's parameter path only.
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: /english-reminder/*
+      Events:
+        Reminder:
+          # ScheduleV2 = EventBridge Scheduler. The older `Schedule` type maps to
+          # EventBridge Rules, which cannot express a timezone.
+          Type: ScheduleV2
+          Properties:
+            Name: !Sub english-reminder-${EnvironmentName}
+            Description: !Sub English reminder schedule (${EnvironmentName}).
+            ScheduleExpression: !Ref ScheduleExpression
+            ScheduleExpressionTimezone: Asia/Ho_Chi_Minh
+            State: !Ref ScheduleState
+            FlexibleTimeWindow:
+              Mode: 'OFF'
+            RetryPolicy:
+              MaximumRetryAttempts: 3
+
+Outputs:
+  FunctionName:
+    Description: Lambda function name.
+    Value: !Ref NotifierFunction
+
+  FunctionArn:
+    Description: Lambda function ARN.
+    Value: !GetAtt NotifierFunction.Arn
+
+  LogGroupName:
+    Description: CloudWatch log group to inspect runs in.
+    Value: !Ref LogGroup
+
+  ScheduleName:
+    Description: EventBridge Scheduler schedule name.
+    Value: !Sub english-reminder-${EnvironmentName}

@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  English-learning reminder system -- root stack.
+
+  Each environment is declared as an AWS::Serverless::Application, which the SAM
+  transform expands server-side into an AWS::CloudFormation::Stack. The deployed
+  result is one root CloudFormation stack owning a nested stack per environment,
+  while the service template itself stays in terse SAM syntax.
+
+  prod fires every evening. test is a one-shot used to prove a change end-to-end
+  without waiting for, or disturbing, the real reminder.
+
+Parameters:
+  TelegramChatId:
+    Type: String
+    Description: Telegram chat id to send the reminder to (not a secret).
+
+  ProdScheduleExpression:
+    Type: String
+    Default: cron(0 21 * * ? *)
+    Description: Production schedule -- 21:00 every day, Asia/Ho_Chi_Minh.
+
+  TestScheduleExpression:
+    Type: String
+    Description: >
+      Test schedule. Use at(yyyy-mm-ddThh:mm:ss) for a single firing -- a
+      one-shot will not fire again, so re-arm it by redeploying with a new
+      value. Must be in the future at deploy time or it never fires.
+
+  TestScheduleState:
+    Type: String
+    Default: ENABLED
+    AllowedValues: [ENABLED, DISABLED]
+    Description: >
+      Set DISABLED to park the test environment: the function stays invokable on
+      demand, but nothing fires on a clock.
+
+  LogRetentionDays:
+    Type: Number
+    Default: 30
+    Description: CloudWatch Logs retention, in days.
+
+Resources:
+  NotifierProd:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: services/notifier/template.yaml
+      Parameters:
+        EnvironmentName: prod
+        TelegramChatId: !Ref TelegramChatId
+        ScheduleExpression: !Ref ProdScheduleExpression
+        ScheduleState: ENABLED
+        LogRetentionDays: !Ref LogRetentionDays
+
+  NotifierTest:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: services/notifier/template.yaml
+      Parameters:
+        EnvironmentName: test
+        TelegramChatId: !Ref TelegramChatId
+        ScheduleExpression: !Ref TestScheduleExpression
+        ScheduleState: !Ref TestScheduleState
+        LogRetentionDays: !Ref LogRetentionDays
+
+Outputs:
+  ProdFunctionName:
+    Description: Production function -- invoke to test the real path on demand.
+    Value: !GetAtt NotifierProd.Outputs.FunctionName
+
+  ProdLogGroup:
+    Description: CloudWatch log group for production runs.
+    Value: !GetAtt NotifierProd.Outputs.LogGroupName
+
+  TestFunctionName:
+    Description: Test function -- safe to invoke freely.
+    Value: !GetAtt NotifierTest.Outputs.FunctionName
+
+  TestLogGroup:
+    Description: CloudWatch log group for test runs.
+    Value: !GetAtt NotifierTest.Outputs.LogGroupName

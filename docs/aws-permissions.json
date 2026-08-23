@@ -1,0 +1,100 @@
+{
+  "Comment": "Least-privilege additions required to deploy english-reminder. Attach to the deploying IAM user. Replace ACCOUNT_ID and keep the region in sync with samconfig.toml. See docs/RUNBOOK.md for why each block is needed, and docs/DEPLOY-LOG.md for how each was discovered.",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "SamManagedArtifactBucketCreate",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:PutBucketPolicy",
+        "s3:GetBucketPolicy",
+        "s3:PutBucketTagging",
+        "s3:GetBucketTagging",
+        "s3:PutBucketVersioning",
+        "s3:GetBucketVersioning",
+        "s3:PutEncryptionConfiguration",
+        "s3:GetEncryptionConfiguration",
+        "s3:PutBucketPublicAccessBlock",
+        "s3:GetBucketPublicAccessBlock",
+        "s3:GetBucketLocation",
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::aws-sam-cli-managed-default-*"
+    },
+    {
+      "Sid": "SamManagedArtifactObjects",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": "arn:aws:s3:::aws-sam-cli-managed-default-*/*"
+    },
+    {
+      "Sid": "BotTokenParameter",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:PutParameter",
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:DeleteParameter",
+        "ssm:AddTagsToResource",
+        "ssm:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:ssm:ap-southeast-1:ACCOUNT_ID:parameter/english-reminder/*"
+    },
+    {
+      "Sid": "BotTokenParameterList",
+      "Effect": "Allow",
+      "Action": "ssm:DescribeParameters",
+      "Resource": "*"
+    },
+    {
+      "Sid": "LambdaAndSchedulerExecutionRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:PassRole",
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:GetRolePolicy",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:TagRole",
+        "iam:UntagRole",
+        "iam:ListRoleTags"
+      ],
+      "Resource": "arn:aws:iam::ACCOUNT_ID:role/english-reminder-*"
+    },
+    {
+      "Sid": "ReminderSchedules",
+      "Effect": "Allow",
+      "Action": [
+        "scheduler:CreateSchedule",
+        "scheduler:GetSchedule",
+        "scheduler:UpdateSchedule",
+        "scheduler:DeleteSchedule",
+        "scheduler:TagResource",
+        "scheduler:UntagResource",
+        "scheduler:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:scheduler:ap-southeast-1:ACCOUNT_ID:schedule/default/english-reminder-*"
+    },
+    {
+      "Sid": "ReminderSchedulesList",
+      "Effect": "Allow",
+      "Action": [
+        "scheduler:ListSchedules",
+        "scheduler:ListScheduleGroups",
+        "scheduler:GetScheduleGroup"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

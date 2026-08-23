@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(node --test*)",
+      "Bash(sam validate*)",
+      "Bash(sam build*)",
+      "Bash(aws sts get-caller-identity*)",
+      "Bash(aws cloudformation describe-stack*)",
+      "Bash(aws cloudformation list-stack*)",
+      "Bash(aws cloudformation get-template*)",
+      "Bash(aws scheduler get-schedule*)",
+      "Bash(aws scheduler list-schedules*)",
+      "Bash(aws logs tail*)",
+      "Bash(aws logs describe-log-groups*)",
+      "Bash(aws ssm describe-parameters*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Bash(aws ssm get-parameter*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-template.sh",
+            "timeout": 60,
+            "statusMessage": "Linting template"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+.env
+node_modules/
+.aws-sam/
+.DS_Store
+
+# Personal, machine-local Claude Code config. settings.json IS committed:
+# it carries the team's hook wiring and the deny rules that keep the bot
+# token out of transcripts.
+.claude/settings.local.json
+CLAUDE.local.md

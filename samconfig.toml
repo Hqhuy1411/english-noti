@@ -1,0 +1,19 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "english-reminder"
+region = "ap-southeast-1"
+
+# CAPABILITY_AUTO_EXPAND is required because the root template uses nested
+# stacks via the SAM macro. Without it, deploy fails with a fairly opaque
+# "Requires capabilities" error.
+capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
+
+# Let SAM manage the S3 bucket holding the code zip and the nested template,
+# instead of creating and wiring one by hand.
+resolve_s3 = true
+
+confirm_changeset = true
+
+[default.build.parameters]
+cached = true
