@@ -132,3 +132,16 @@ execution role narrowly even while the deploying principal is broad.
   the stack.
 - `sam build` output is not the transformed template. To see what CloudFormation
   actually received: `aws cloudformation get-template --template-stage Processed`.
+
+## Two facts specific to this project
+
+- **The permission set is already written down.** `docs/aws-permissions.json` holds
+  the least-privilege set this stack actually needs, `docs/RUNBOOK.md` §4 has the
+  reasoning, and `docs/DEPLOY-LOG.md` records which were missing and how each was
+  found. Read those three before re-deriving anything — the discovery took six
+  deploy rounds.
+- **KMS needs no explicit statement here.** With a SecureString on the default
+  `alias/aws/ssm` key, no `kms:Decrypt` statement is needed in the function's
+  policy: that key's policy already grants the account access via `kms:ViaService`.
+  Confirmed by a real invocation, not assumed. If a KMS `AccessDeniedException`
+  ever appears in the logs, a non-default key is in play — add the statement then.
