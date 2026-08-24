@@ -4,7 +4,7 @@
 is open, and where the detail lives. If it disagrees with reality, fixing it is
 part of the next commit.
 
-Last reviewed: 2026-08-23.
+Last reviewed: 2026-08-24.
 
 ## Phase
 
@@ -19,13 +19,20 @@ Root stack `english-reminder` in `ap-southeast-1`, two nested stacks:
 | Environment | Function | Schedule |
 |---|---|---|
 | prod | `english-reminder-notifier-prod` | `english-reminder-prod`, `cron(0 21 * * ? *)` |
-| test | `english-reminder-notifier-test` | `english-reminder-test`, one-shot `at(...)` |
+| test | `english-reminder-notifier-test` | `english-reminder-test`, **parked** — `DISABLED` |
 
 Deliberately **outside** the stack: the SSM SecureString bot token (ADR 0004) and
 SAM's managed artifact bucket. Deleting the stack removes neither.
 
-A lingering `ENABLED` one-shot test schedule with a past expression is **not**
-pending work — one-shots do not self-delete (ADR 0005).
+The test environment was **parked on 2026-08-24** at the user's request, once prod
+was confirmed working: `TestScheduleState=DISABLED`, so nothing fires on a clock.
+The function, its log group and its logs all remain, so Phase 2 can re-arm the
+smoke test with `/deploy` — which now passes `TestScheduleState=ENABLED`
+explicitly, because CloudFormation would otherwise inherit `DISABLED` and the
+smoke test would silently never fire.
+
+A lingering one-shot with a past expression is **not** pending work either way —
+one-shots do not self-delete (ADR 0005).
 
 Full account-specific detail: `docs/DEPLOY-LOG.md`. Run `/status` for a live check.
 
@@ -44,7 +51,8 @@ CloudWatch alarm on the function's `Errors` metric wired to SNS. They are listed
 
 ## Latest decision
 
-**ADR 0007.** Index: `docs/decisions/README.md`. Next number is **0008**.
+**ADR 0008** — run history is a committed file (`docs/RUN-HISTORY.md`).
+Index: `docs/decisions/README.md`. Next number is **0009**.
 
 ## Where things are
 
@@ -52,6 +60,7 @@ CloudWatch alarm on the function's `Errors` metric wired to SNS. They are listed
 |---|---|
 | How do I build / deploy / verify / tear down? | `docs/RUNBOOK.md` |
 | What was actually deployed, and what blocked it? | `docs/DEPLOY-LOG.md` |
+| Did it fire, and did it send? | `docs/RUN-HISTORY.md` — refresh with `node scripts/record-run-history.mjs` |
 | Why is it built this way? | `docs/decisions/` |
 | What am I not allowed to break? | `CLAUDE.md` + `.claude/rules/` |
 | A deploy just rolled back | `cfn-deploy-triage` skill |

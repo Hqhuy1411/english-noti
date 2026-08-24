@@ -37,8 +37,19 @@ TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%dT%H:%M:%S'
 ```
 sam deploy --no-confirm-changeset --parameter-overrides \
   TelegramChatId=<from .env> \
-  TestScheduleExpression='at(<resolved>)'
+  TestScheduleExpression='at(<resolved>)' \
+  TestScheduleState=ENABLED
 ```
+
+**Pass `TestScheduleState=ENABLED` every time, even though `ENABLED` is the
+template default.** The test environment was parked on 2026-08-24 (ADR 0008,
+`docs/STATUS.md`), so the *stack's* stored value is `DISABLED`. A parameter you
+omit is not reset to its default — CloudFormation reuses the previous value. Omit
+it and the deploy succeeds, reports a perfectly good `at(...)` expression, and the
+smoke test silently never fires: the same failure mode as a past `at(...)`, from a
+different direction.
+
+To park it again after testing, deploy with `TestScheduleState=DISABLED`.
 
 Read `TELEGRAM_CHAT_ID` from `.env`; do not hardcode it. Never pass the bot
 token — it lives in SSM and is read at runtime.

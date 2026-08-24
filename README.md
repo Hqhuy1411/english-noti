@@ -42,12 +42,14 @@ which is why retention is capped.
 | `services/notifier/template.yaml` | SAM template: function, schedule, log group, IAM. |
 | `services/notifier/src/` | Lambda source. `lesson.mjs` is the seam where Phase 2 plugs in real lesson content. |
 | `services/notifier/scripts/` | Local helpers -- talk to Telegram only, no AWS needed. |
+| `scripts/` | Local helpers that **do** need AWS credentials, kept out of the directory above so that one stays a Telegram-only gate. |
 | `samconfig.toml` | Stack name, region, and the capabilities nested stacks require. |
 | `docs/STATUS.md` | What is live, what is open, what is next. Start here. |
 | `docs/decisions/` | Architecture decision records -- why it is built this way, and what was rejected. |
 | `docs/backlog/` | Work items as numbered markdown files, with acceptance criteria. |
 | `docs/RUNBOOK.md` | Every build, deploy, verify, operate and teardown command. |
 | `docs/DEPLOY-LOG.md` | What was actually deployed, and what blocked it. |
+| `docs/RUN-HISTORY.md` | Every run the reminder has made. The durable record -- CloudWatch only keeps 30 days. |
 
 ## First-time setup
 
@@ -174,6 +176,18 @@ A failure carries Telegram's own `description` alongside `errorCode` and
 `httpStatus`, so a rejected send explains itself without a redeploy. Failures
 are rethrown so the invocation counts against the Lambda `Errors` metric and the
 scheduler's retry policy applies.
+
+**CloudWatch keeps 30 days, so it is a window, not a record.** The lasting history
+is `docs/RUN-HISTORY.md`, one committed row per run. Harvest new runs into it with:
+
+```sh
+node scripts/record-run-history.mjs
+```
+
+It only appends, matching on `requestId`, so rows for runs CloudWatch has already
+forgotten stay put -- never regenerate the file from scratch. Run it at least once
+a month, or a night's evidence expires unrecorded (ADR 0008). `/status` does it for
+you.
 
 ## Phase 2
 

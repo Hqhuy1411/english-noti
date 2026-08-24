@@ -17,6 +17,7 @@ read when someone is about to change it.
 | [0005](0005-one-template-two-environments.md) | Two environments from one service template via `EnvironmentName` |
 | [0006](0006-testable-knobs-are-parameters.md) | Anything you would edit a file to test becomes a stack Parameter |
 | [0007](0007-lesson-mjs-is-the-only-phase-2-seam.md) | `lesson.mjs` is the only file Phase 2 changes |
+| [0008](0008-run-history-is-a-committed-file.md) | Run history is a committed file, harvested from CloudWatch before its 30-day retention drops it |
 
 ## Adding one
 

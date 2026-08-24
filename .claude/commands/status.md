@@ -50,3 +50,17 @@ Report, per environment:
 
 Do not invoke either function to "check" it: that sends a real Telegram message
 and writes a manual entry into the log you are auditing.
+
+## Record
+
+CloudWatch keeps 30 days; `docs/RUN-HISTORY.md` keeps everything (ADR 0008). This
+is the moment to harvest, while you are already looking at runs:
+
+```
+node scripts/record-run-history.mjs
+```
+
+It only ever appends, and prints how many runs it added. This is the one write
+`/status` performs, and it touches a local file — nothing in AWS changes. Mention
+the count in the report, and if it added rows for nights nobody had looked at,
+say so — that is the gap this file exists to make visible.

@@ -254,8 +254,14 @@ stack parameter precisely so this stays a one-liner:
 
 ```sh
 sam deploy --no-confirm-changeset --parameter-overrides \
-  TelegramChatId=<id> TestScheduleExpression='at(2026-08-25T09:00:00)'
+  TelegramChatId=<id> TestScheduleExpression='at(2026-08-25T09:00:00)' \
+  TestScheduleState=ENABLED
 ```
+
+`TestScheduleState=ENABLED` is not redundant. The test environment is currently
+parked, so the stack's stored value is `DISABLED`, and an omitted parameter keeps
+its previous value rather than reverting to the template default -- the deploy
+would report a healthy `at(...)` and never fire (ADR 0008).
 
 **Park the test environment** so nothing fires on a clock, while keeping the
 function invokable on demand:
@@ -265,6 +271,16 @@ sam deploy --no-confirm-changeset --parameter-overrides \
   TelegramChatId=<id> TestScheduleExpression='at(2026-08-25T09:00:00)' \
   TestScheduleState=DISABLED
 ```
+
+**Record the runs so far.** CloudWatch retention is 30 days; `docs/RUN-HISTORY.md`
+is the permanent record. Append-only and safe to re-run:
+
+```sh
+node scripts/record-run-history.mjs            # merge new runs
+node scripts/record-run-history.mjs --dry-run  # show what it would add
+```
+
+Do this at least monthly, or the oldest runs expire before they are recorded.
 
 **Change the production time** (example: 20:30 instead of 21:00):
 

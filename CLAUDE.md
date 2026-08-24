@@ -22,6 +22,7 @@ holds only what is true everywhere. Everything else loads when it is relevant.
 | Work items, with acceptance criteria | `docs/backlog/` |
 | Build, deploy, verify, operate, tear down | `docs/RUNBOOK.md` |
 | What was actually deployed, and what blocked it | `docs/DEPLOY-LOG.md` |
+| Did it actually fire, on which nights, and did it send | `docs/RUN-HISTORY.md` |
 | Least-privilege deploy permissions | `docs/aws-permissions.json` |
 | Rules for templates / runtime code / tests | `.claude/rules/` — path-scoped, load themselves |
 | A deploy rolled back, or a permission is suspect | `cfn-deploy-triage` skill |
