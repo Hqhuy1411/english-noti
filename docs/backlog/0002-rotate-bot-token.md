@@ -20,6 +20,15 @@ The repo has just been given a remote (`github.com:Hqhuy1411/english-noti`). The
 token itself was never committed — `.gitignore` covers `.env`, verified with
 `git check-ignore` — so this is about the transcript exposure, not a git leak.
 
+**Urgency raised, 2026-08-24.** That remote is a **public** repository, and the
+first push was made deliberately, with the identifiers left unredacted. Nothing
+secret is published by it — the token is not in the repo — but
+`docs/DEPLOY-LOG.md` now publicly names the bot (`@Hocbaidithangngu_bot`), the AWS
+account and the deploying IAM user. A bot handle plus a token that has already
+been through a transcript is a worse combination in public than it was in
+private, because an attacker no longer has to know the bot exists. The decision to
+publish as-is was taken knowingly; this ticket is the thing that closes the loop.
+
 ## Constraints
 
 - **ADR 0004** — the token is an SSM SecureString created out-of-band. Rotation is

@@ -41,7 +41,7 @@ Full account-specific detail: `docs/DEPLOY-LOG.md`. Run `/status` for a live che
 | # | Item | State |
 |---|---|---|
 | [0001](backlog/0001-real-lesson-content.md) | Real lesson content behind the `lesson.mjs` seam | open — the Phase 2 headline |
-| [0002](backlog/0002-rotate-bot-token.md) | Rotate the bot token exposed in a setup transcript | open — security, do before sharing the repo |
+| [0002](backlog/0002-rotate-bot-token.md) | Rotate the bot token exposed in a setup transcript | open — **urgency raised**: the repo is now public and names the bot |
 
 Known Phase 2 ideas **not yet ticketed**, so nobody plans against them as if they
 were decided: a separate `services/lesson/` nested stack, interactive
