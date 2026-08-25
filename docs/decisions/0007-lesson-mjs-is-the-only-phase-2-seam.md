@@ -1,6 +1,6 @@
 # 0007 — `lesson.mjs` is the only file Phase 2 changes
 
-**Status:** accepted · **Date:** 2026-08 · **Applies to:** `services/notifier/src/`
+**Status:** superseded by 0009 · **Date:** 2026-08 · **Applies to:** `services/notifier/src/`
 
 ## Context
 

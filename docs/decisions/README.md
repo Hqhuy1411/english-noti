@@ -18,6 +18,8 @@ read when someone is about to change it.
 | [0006](0006-testable-knobs-are-parameters.md) | Anything you would edit a file to test becomes a stack Parameter |
 | [0007](0007-lesson-mjs-is-the-only-phase-2-seam.md) | `lesson.mjs` is the only file Phase 2 changes |
 | [0008](0008-run-history-is-a-committed-file.md) | Run history is a committed file, harvested from CloudWatch before its 30-day retention drops it |
+| [0009](0009-lesson-content-source-state-and-the-async-seam.md) | Lesson content: committed curriculum, DynamoDB state, and an async `buildLesson` seam (supersedes 0007) |
+| [0010](0010-study-table-single-table-key-schema.md) | The study table: single-table key schema, GSI1 for due items, spoken-not-read SRS invariant |
 
 ## Adding one
 

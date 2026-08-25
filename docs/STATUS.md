@@ -57,8 +57,11 @@ covered by ticket 0003's inline keyboard and webhook.)
 
 ## Latest decision
 
-**ADR 0008** — run history is a committed file (`docs/RUN-HISTORY.md`).
-Index: `docs/decisions/README.md`. Next number is **0009**.
+**ADR 0010** — the study table's single-table key schema (GSI1 for due items, the
+spoken-not-read SRS invariant). **ADR 0009** answered backlog 0001's three open
+questions (curated committed curriculum, DynamoDB state, module not service) and
+widened the `lesson.mjs` seam to async with a `replyMarkup` parameter, superseding
+**ADR 0007**. Index: `docs/decisions/README.md`. Next number is **0011**.
 
 ## Where things are
 
