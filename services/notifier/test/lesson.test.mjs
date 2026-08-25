@@ -183,3 +183,46 @@ test('reading a given sentence aloud gets no scaffolding, since there is nothing
   }
   assert.ok(sawShadow, 'the rotation never produced a shadow task to check');
 });
+
+test('an unfamiliar concept has a way in, offered after the attempt not before', async () => {
+  const tech = curriculum.filter((i) => i.tags.includes('tech'));
+  const { text } = await buildLesson({
+    now: new Date('2026-08-26T14:00:00Z'),
+    table: null,
+    curriculum: tech,
+  });
+
+  assert.match(text, /Chưa quen khái niệm này/);
+
+  // Order matters: the prompt has to come first, or the primer hands over the
+  // answer before the learner has tried.
+  assert.ok(
+    text.indexOf('🎤 Nói') < text.indexOf('Chưa quen khái niệm này'),
+    'the primer must sit below the speaking task, not above it',
+  );
+});
+
+test('every technical item carries a primer, so none of them is a dead end', () => {
+  const missing = curriculum
+    .filter((i) => i.tags.includes('tech'))
+    .filter((i) => typeof i.brief !== 'string' || i.brief.trim() === '')
+    .map((i) => i.id);
+  assert.deepEqual(missing, [], `tech items with no brief: ${missing.join(', ')}`);
+});
+
+test('a primer is plain prose -- it renders into a Telegram message unescaped otherwise', () => {
+  for (const item of curriculum.filter((i) => i.brief)) {
+    assert.doesNotMatch(item.brief, /\n/, `${item.id}: newline in brief`);
+    assert.doesNotMatch(item.brief, /[*_`#]/, `${item.id}: markdown character in brief`);
+  }
+});
+
+test('non-technical tasks get no primer, because there is no concept to learn', async () => {
+  const daily = curriculum.filter((i) => i.tags.includes('daily'));
+  const { text } = await buildLesson({
+    now: new Date('2026-08-26T14:00:00Z'),
+    table: null,
+    curriculum: daily,
+  });
+  assert.doesNotMatch(text, /Chưa quen khái niệm này/);
+});

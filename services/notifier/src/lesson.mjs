@@ -156,6 +156,9 @@ function pickTask(today, mode, items) {
       type: 'explain',
       prompt: `Giải thích "${focus.word}" trong 60 giây bằng tiếng Anh, như đang nói với một đồng nghiệp mới vào team. Đừng đọc định nghĩa — nói như trong design review.`,
       expectedText: null,
+      // Carried so the message can offer a way in when the concept itself is
+      // unfamiliar. Nobody knows all thirty-three of these.
+      brief: focus.brief ?? null,
     };
   }
 
@@ -232,6 +235,20 @@ function render({ now, environment, mode, review, fresh, task, writing, hints = 
   lines.push('<b>🎤 Nói</b>', esc(task.prompt));
   if (task.expectedText) lines.push('', `<b>“${esc(task.expectedText)}”</b>`);
   lines.push(...hints);
+
+  // Deliberately last, and deliberately labelled as optional. Reading it first
+  // would hand over the answer and cost the retrieval effort that makes the
+  // exercise work -- but not having it at all makes an unknown concept a dead
+  // end rather than a hard question.
+  if (task.brief) {
+    lines.push(
+      '',
+      '<b>📖 Chưa quen khái niệm này?</b>',
+      '<i>Đọc 30 giây rồi giải thích lại bằng lời của bạn. Nếu đã biết rồi thì bỏ qua — thử nói trước đã.</i>',
+      '',
+      esc(task.brief),
+    );
+  }
 
   if (writing) {
     lines.push('', '<b>📝 Viết</b>', esc(writing));

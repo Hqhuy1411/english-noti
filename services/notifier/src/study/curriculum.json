@@ -610,7 +610,8 @@
       "example": "With MVCC the read never blocks the write, so the lock contention you are worried about does not happen.",
       "viGloss": "kiểm soát đồng thời đa phiên bản",
       "shadowSentence": "Multi version concurrency control means readers never block the writers.",
-      "domain": "database"
+      "domain": "database",
+      "brief": "Giải quyết chuyện reader phải chờ writer: thay vì khoá dòng, database giữ nhiều version của cùng một row. Mỗi transaction thấy một snapshot ứng với thời điểm nó bắt đầu, nên đọc không bao giờ block ghi. Đổi lại là các version cũ phải được dọn dẹp, ví dụ vacuum trong Postgres."
     },
     {
       "id": "write-ahead-log",
@@ -621,7 +622,8 @@
       "example": "Every commit hits the write-ahead log first, so after a crash we just replay from the last checkpoint.",
       "viGloss": "nhật ký ghi trước",
       "shadowSentence": "The write ahead log gets flushed before we acknowledge the commit.",
-      "domain": "database"
+      "domain": "database",
+      "brief": "Nếu crash ngay giữa lúc sửa data file thì dữ liệu hỏng, nên database ghi ý định thay đổi vào write-ahead log trước rồi mới sửa file. Log ghi tuần tự nên rất nhanh; khi khởi động lại chỉ cần replay từ checkpoint gần nhất. WAL cũng chính là nguồn cho replication."
     },
     {
       "id": "isolation-level",
@@ -632,7 +634,8 @@
       "example": "We run at read committed, so if you need repeatable reads you have to raise the isolation level yourself.",
       "viGloss": "mức cô lập giao dịch",
       "shadowSentence": "We raised the isolation level to repeatable read for that report.",
-      "domain": "database"
+      "domain": "database",
+      "brief": "Quyết định một transaction được phép nhìn thấy bao nhiêu phần việc đang dở của transaction khác. Đi từ read committed lên repeatable read rồi serializable thì càng ít anomaly như dirty read, non-repeatable read hay phantom read, nhưng càng nhiều lock và càng dễ bị abort. Postgres mặc định là read committed."
     },
     {
       "id": "roll-back-a-transaction",
@@ -643,7 +646,8 @@
       "example": "If any one of the three writes fails, we roll back the whole transaction and return an error to the caller.",
       "viGloss": "hoàn tác giao dịch",
       "shadowSentence": "If the second write fails, we roll back the whole transaction.",
-      "domain": "database"
+      "domain": "database",
+      "brief": "Khi một bước trong nhóm thao tác thất bại, bạn không muốn để lại trạng thái nửa vời; rollback đưa mọi thứ về đúng như trước khi transaction bắt đầu. Database dùng undo log hoặc version cũ để huỷ các thay đổi chưa commit. Lưu ý rollback không hoàn tác side effect bên ngoài như email hay lệnh gọi API."
     },
     {
       "id": "query-planner",
@@ -654,7 +658,8 @@
       "example": "The planner went with a sequential scan because the table statistics were stale.",
       "viGloss": "bộ lập kế hoạch truy vấn",
       "shadowSentence": "The query planner ignored our index and chose a sequential scan.",
-      "domain": "database"
+      "domain": "database",
+      "brief": "Cùng một câu SQL có hàng chục cách thực thi, và chọn sai thì chậm gấp trăm lần. Planner ước lượng chi phí từng phương án dựa trên table statistics rồi chọn cái rẻ nhất: sequential scan hay index scan, hash join hay nested loop. Statistics cũ khiến nó ước lượng sai, nên chạy EXPLAIN ANALYZE để xem thực tế."
     },
     {
       "id": "replication-lag",
@@ -665,7 +670,8 @@
       "example": "The customer saw an old balance because that read hit a replica a few seconds behind the primary.",
       "viGloss": "độ trễ sao chép",
       "shadowSentence": "Replication lag spiked, so the replica served a stale balance.",
-      "domain": "database"
+      "domain": "database",
+      "brief": "Replica nhận thay đổi từ primary theo kiểu bất đồng bộ, nên luôn chậm hơn một chút. Primary gửi WAL stream đi, replica apply lại; nếu replica bận hoặc mạng chậm thì khoảng cách đó nới rộng ra. Hậu quả thực tế là read-after-write không thấy dữ liệu vừa ghi, nên đường đọc nhạy cảm phải trỏ vào primary."
     },
     {
       "id": "deadlock",
@@ -676,7 +682,8 @@
       "example": "Two jobs grabbed the same rows in a different order, and the database killed one of them to break the deadlock.",
       "viGloss": "kẹt khoá hai chiều",
       "shadowSentence": "We hit a deadlock because two jobs took the locks in different order.",
-      "domain": "database"
+      "domain": "database",
+      "brief": "Hai transaction cùng chờ lock mà bên kia đang giữ, không ai nhả ra nên cả hai đứng im mãi. Database phát hiện vòng chờ trong wait-for graph rồi chọn một bên làm victim và abort nó. Cách phòng phổ biến là luôn lấy lock theo cùng một thứ tự, và giữ transaction thật ngắn."
     },
     {
       "id": "eventual-consistency",
@@ -687,7 +694,8 @@
       "example": "That view is eventually consistent, so give it a moment before you assert on the value.",
       "viGloss": "nhất quán cuối cùng",
       "shadowSentence": "The view is eventually consistent, so the value converges after a short delay.",
-      "domain": "distributed-systems"
+      "domain": "distributed-systems",
+      "brief": "Khi dữ liệu nằm trên nhiều node, bắt tất cả đồng ý ngay lập tức thì rất tốn latency. Eventual consistency chấp nhận mỗi replica cập nhật trễ một nhịp, miễn là khi ngừng ghi thì cuối cùng tất cả hội tụ về cùng một giá trị. Đổi lại client có thể đọc phải dữ liệu cũ, gọi là stale read."
     },
     {
       "id": "quorum",
@@ -698,7 +706,8 @@
       "example": "A write needs a quorum, so with three nodes we can lose one and still take traffic.",
       "viGloss": "số nút tối thiểu để đồng thuận",
       "shadowSentence": "The cluster lost quorum, so it stopped accepting any new writes.",
-      "domain": "distributed-systems"
+      "domain": "distributed-systems",
+      "brief": "Nếu chỉ một node xác nhận thì mất node đó là mất dữ liệu, còn chờ tất cả thì một node chết là cả cụm đứng. Quorum là điểm giữa: một write chỉ tính là thành công khi đa số node xác nhận. Chọn R cộng W lớn hơn N thì tập đọc và tập ghi luôn giao nhau."
     },
     {
       "id": "leader-election",
@@ -709,7 +718,8 @@
       "example": "When the leader stopped answering heartbeats, the cluster held an election and promoted a follower.",
       "viGloss": "bầu nút dẫn đầu",
       "shadowSentence": "The leader stopped sending heartbeats, so the cluster held a new election.",
-      "domain": "distributed-systems"
+      "domain": "distributed-systems",
+      "brief": "Một cụm cần đúng một node được quyền ghi, nếu không hai bên cùng nhận write thì dữ liệu phân kỳ. Các node theo dõi nhau bằng heartbeat; khi leader im lặng quá timeout, một follower tăng term lên và xin vote, ai được đa số thì thành leader mới. Đó là cơ chế của Raft, và quorum ngăn split-brain."
     },
     {
       "id": "idempotent",
@@ -720,7 +730,8 @@
       "example": "The endpoint takes an idempotency key, so a retry cannot charge the customer twice.",
       "viGloss": "chạy lại vẫn ra cùng kết quả",
       "shadowSentence": "We made the handler idempotent, so a retry never charges the customer twice.",
-      "domain": "distributed-systems"
+      "domain": "distributed-systems",
+      "brief": "Trong hệ phân tán bạn không biết request hỏng trước hay sau khi server đã xử lý, nên retry là bắt buộc, và retry chỉ an toàn khi thao tác idempotent, tức gọi một lần hay mười lần đều ra cùng kết quả. Thực tế làm bằng idempotency key: server nhớ key đã xử lý và trả lại kết quả cũ."
     },
     {
       "id": "exponential-backoff",
@@ -731,7 +742,8 @@
       "example": "We retry with exponential backoff and jitter, otherwise every client comes back at exactly the same moment.",
       "viGloss": "chờ tăng dần rồi thử lại",
       "shadowSentence": "We retry with exponential backoff and some jitter to spread the load.",
-      "domain": "distributed-systems"
+      "domain": "distributed-systems",
+      "brief": "Retry ngay lập tức và liên tục chỉ làm service đang quá tải chết hẳn. Exponential backoff tăng gấp đôi thời gian chờ sau mỗi lần hỏng, kiểu 1s, 2s, 4s, 8s, cho hệ thống thời gian hồi phục. Phải cộng thêm jitter ngẫu nhiên, nếu không mọi client cùng thức dậy một lúc và tạo ra đúng cú sốc bạn đang tránh."
     },
     {
       "id": "circuit-breaker",
@@ -742,7 +754,8 @@
       "example": "Once the error rate crosses the threshold the breaker trips, and we fail fast instead of piling up timeouts.",
       "viGloss": "cầu dao ngắt khi lỗi nhiều",
       "shadowSentence": "The circuit breaker tripped, so we failed fast instead of hanging.",
-      "domain": "distributed-systems"
+      "domain": "distributed-systems",
+      "brief": "Khi một dependency đang chết, mỗi request gửi thêm chỉ tốn thread và chờ timeout vô ích. Circuit breaker đếm tỉ lệ lỗi, vượt ngưỡng thì chuyển sang trạng thái open và fail fast ngay mà không gọi đi nữa. Sau một khoảng nó vào half-open, thả vài request thử; thành công thì đóng lại, hỏng thì mở tiếp."
     },
     {
       "id": "backpressure",
@@ -753,7 +766,8 @@
       "example": "The consumer cannot keep up, so we need backpressure rather than letting the queue grow forever.",
       "viGloss": "áp lực ngược, chặn bớt đầu vào",
       "shadowSentence": "The consumer applies backpressure when the queue grows faster than it drains.",
-      "domain": "distributed-systems"
+      "domain": "distributed-systems",
+      "brief": "Khi producer đẩy nhanh hơn consumer xử lý, queue phình ra cho tới lúc hết bộ nhớ hoặc latency thành vô nghĩa. Backpressure là tín hiệu ngược chiều bảo bên gửi chậm lại: bounded queue, block khi đầy, hoặc trả về 429 để client tự giảm tốc. Không có nó thì hệ thống không degrade từ từ mà sập một phát."
     },
     {
       "id": "cache-hit-rate",
@@ -764,7 +778,8 @@
       "example": "The hit rate fell off after we changed the key, so almost every request went straight to the database.",
       "viGloss": "tỉ lệ trúng bộ nhớ đệm",
       "shadowSentence": "Our cache hit rate dropped, so nearly every request reached the database.",
-      "domain": "performance"
+      "domain": "performance",
+      "brief": "Con số cho biết cache thực sự đang giúp bao nhiêu: số request được phục vụ từ cache chia cho tổng số request. Hit rate 95% và 80% nghe gần nhau nhưng tải xuống database gấp bốn lần nhau, vì cái quan trọng là miss rate. Nguyên nhân tụt thường là đổi cache key, TTL quá ngắn, hay working set lớn hơn bộ nhớ."
     },
     {
       "id": "cache-invalidation",
@@ -775,7 +790,8 @@
       "example": "The write path forgot to invalidate the cache, so users kept seeing the old address for an hour.",
       "viGloss": "làm mất hiệu lực cache",
       "shadowSentence": "We forgot to invalidate the cache, so people kept seeing stale data.",
-      "domain": "performance"
+      "domain": "performance",
+      "brief": "Dữ liệu gốc đổi nhưng bản trong cache thì không, và người dùng vẫn thấy giá trị cũ. Có ba cách xử lý: đặt TTL cho entry tự hết hạn, xoá key ngay trong write path, hoặc ghi đè luôn theo kiểu write-through. Khó ở chỗ một thay đổi thường ảnh hưởng nhiều key dẫn xuất, nên rất dễ sót một chỗ."
     },
     {
       "id": "eviction-policy",
@@ -786,7 +802,8 @@
       "example": "It is a least-recently-used cache, so the entries nobody touches get evicted first.",
       "viGloss": "chính sách loại bỏ mục cũ",
       "shadowSentence": "The eviction policy is least recently used, so cold entries leave first.",
-      "domain": "performance"
+      "domain": "performance",
+      "brief": "Cache có dung lượng hữu hạn, nên khi đầy phải quyết định vứt entry nào ra. LRU vứt cái lâu nhất không được đụng tới, đặt cược rằng dữ liệu vừa dùng thì sắp dùng lại; lựa chọn khác là LFU theo tần suất hay TTL theo tuổi. LRU dở khi có một lần scan toàn bộ, vì nó quét sạch những entry đang nóng."
     },
     {
       "id": "cold-cache",
@@ -797,7 +814,8 @@
       "example": "The first minute after a deploy always looks slow because the cache is completely cold.",
       "viGloss": "cache còn nguội, chưa có dữ liệu",
       "shadowSentence": "Right after a deploy the cache is cold, so everything feels slow.",
-      "domain": "performance"
+      "domain": "performance",
+      "brief": "Ngay sau khi deploy hoặc restart, cache rỗng nên mọi request đều miss và rơi thẳng xuống database, latency vọt lên dù code không có gì sai. Cache chỉ ấm dần khi traffic thật đi qua và lấp đầy các key hay dùng. Cách giảm đau là warm up trước bằng các truy vấn phổ biến, hoặc rollout từng phần thay vì đổi hết một lúc."
     },
     {
       "id": "thundering-herd",
@@ -808,7 +826,8 @@
       "example": "When that key expires every request stampedes the database at once, which is a classic thundering herd.",
       "viGloss": "đàn yêu cầu ập vào cùng lúc",
       "shadowSentence": "When the key expires we get a thundering herd hitting the database.",
-      "domain": "performance"
+      "domain": "performance",
+      "brief": "Một key nóng hết hạn, và cùng khoảnh khắc đó cả nghìn request cùng miss rồi cùng lao xuống database để tính lại đúng một giá trị. Database chịu tải gấp nghìn lần cần thiết. Cách chữa là single-flight lock, cho một request đi tính còn lại chờ, cộng thêm jitter vào TTL để các key không hết hạn cùng lúc."
     },
     {
       "id": "tail-latency",
@@ -819,7 +838,8 @@
       "example": "The average looks fine, but the tail latency is what the customer actually complains about.",
       "viGloss": "độ trễ của nhóm chậm nhất",
       "shadowSentence": "The average looks fine, but our tail latency is what customers feel.",
-      "domain": "performance"
+      "domain": "performance",
+      "brief": "Trung bình che mất phần đuôi: p99 là ngưỡng mà 99% request nhanh hơn, còn 1% chậm nhất rơi vào đó. 1% nghe nhỏ nhưng một trang gọi hai mươi service thì gần như user nào cũng chạm phải ít nhất một lần chậm. Nguồn gây tail thường là GC pause, cold cache, lock contention hay retry."
     },
     {
       "id": "n-plus-one-query",
@@ -830,7 +850,8 @@
       "example": "The list page fires one query per row, so let us eager-load the relation instead.",
       "viGloss": "lỗi truy vấn lặp theo từng dòng",
       "shadowSentence": "That page has an n plus one query problem in the list view.",
-      "domain": "performance"
+      "domain": "performance",
+      "brief": "ORM làm bạn không thấy chi phí: lấy danh sách 100 dòng là 1 query, rồi mỗi lần chạm vào quan hệ lazy-loaded lại bắn thêm 1 query, thành 101 lần round trip. Trên máy local thì không cảm nhận được, lên production với network latency thì trang chết. Sửa bằng eager loading hoặc một JOIN duy nhất."
     },
     {
       "id": "inverted-index",
@@ -841,7 +862,8 @@
       "example": "Search is fast because the inverted index maps each term straight to the documents that contain it.",
       "viGloss": "chỉ mục ngược",
       "shadowSentence": "An inverted index maps every term to the documents that contain it.",
-      "domain": "search"
+      "domain": "search",
+      "brief": "Tìm một từ trong triệu document mà quét từng cái thì không xong nổi. Inverted index lật ngược quan hệ: thay vì document chứa những term nào, nó lưu mỗi term trỏ tới một posting list các document ID chứa term đó. Truy vấn nhiều từ chỉ còn là giao các posting list. Đổi lại index phải build lại khi dữ liệu đổi."
     },
     {
       "id": "tokenize-and-stem",
@@ -852,7 +874,8 @@
       "example": "We tokenize the query and stem each word, so a search for running still matches run.",
       "viGloss": "tách từ và rút về gốc",
       "shadowSentence": "We tokenize the query and stem each word down to its root.",
-      "domain": "search"
+      "domain": "search",
+      "brief": "Người dùng gõ Running còn document viết runs, so khớp chuỗi thô sẽ trượt. Tokenize cắt văn bản thành từng term theo khoảng trắng và dấu câu, rồi stemming cắt hậu tố để đưa về gốc chung là run. Cùng một analyzer phải chạy cho cả lúc index lẫn lúc query, nếu lệch thì tìm không ra."
     },
     {
       "id": "relevance-score",
@@ -863,7 +886,8 @@
       "example": "We boost recent documents, otherwise the relevance score puts a five-year-old page at the top.",
       "viGloss": "điểm liên quan khi xếp hạng",
       "shadowSentence": "We boost newer documents so the relevance score ranks them a bit higher.",
-      "domain": "search"
+      "domain": "search",
+      "brief": "Trả về đúng document chứa từ khoá là chưa đủ, còn phải xếp cái nào lên trước. Search engine chấm điểm mỗi document bằng công thức kiểu BM25: term hiếm thì nặng điểm hơn, term xuất hiện nhiều lần trong một document thì tăng, document dài thì bị chuẩn hoá xuống. Thực tế thường boost thêm theo độ mới."
     },
     {
       "id": "faceted-search",
@@ -874,7 +898,8 @@
       "example": "Those sidebar counts come from facets, so filtering by state does not need a second query.",
       "viGloss": "lọc theo nhóm thuộc tính",
       "shadowSentence": "The sidebar counts come from facets, so filtering needs no extra query.",
-      "domain": "search"
+      "domain": "search",
+      "brief": "Người dùng muốn vừa thấy kết quả vừa thấy còn lọc được theo gì và mỗi nhóm còn bao nhiêu món. Faceted search chạy aggregation trên chính tập kết quả, đếm số document theo từng giá trị của các field như state, price range, category. Vì đếm ngay trong một lượt truy vấn nên không phải bắn thêm query cho mỗi bộ lọc."
     },
     {
       "id": "schema-evolution",
@@ -885,7 +910,8 @@
       "example": "Adding an optional field is backward compatible, but renaming one breaks every consumer still on the old schema.",
       "viGloss": "lược đồ thay đổi dần theo thời gian",
       "shadowSentence": "Adding an optional field keeps the schema change backward compatible for consumers.",
-      "domain": "search"
+      "domain": "search",
+      "brief": "Producer và consumer không bao giờ deploy cùng lúc, nên schema phải đổi được mà không làm gãy bên còn lại. Thêm field optional có default là backward compatible; đổi tên hay đổi kiểu thì không. Cách an toàn là expand rồi mới contract: thêm field mới, cho consumer chuyển dần, xoá field cũ ở lần deploy sau."
     },
     {
       "id": "batch-versus-streaming",
@@ -896,7 +922,8 @@
       "example": "It is a nightly batch today, but if finance needs it live we would have to move to streaming.",
       "viGloss": "chạy theo lô hay theo luồng",
       "shadowSentence": "It runs as a nightly batch, but finance wants it closer to streaming.",
-      "domain": "search"
+      "domain": "search",
+      "brief": "Cùng một phép tính, khác nhau ở lúc chạy. Batch gom dữ liệu theo cửa sổ thời gian rồi xử lý một lượt, đơn giản và dễ chạy lại, nhưng kết quả trễ cả tiếng hoặc cả đêm. Streaming xử lý từng event ngay khi tới nên gần real time, đổi lại phải lo late arrival, watermark và giữ state liên tục."
     },
     {
       "id": "bloom-filter",
@@ -907,7 +934,8 @@
       "example": "The Bloom filter tells us the key is definitely not there, which saves us the disk read.",
       "viGloss": "bộ lọc xác suất, có thể báo nhầm",
       "shadowSentence": "A bloom filter never gives a false negative, only a false positive.",
-      "domain": "data-structures"
+      "domain": "data-structures",
+      "brief": "Cấu trúc giúp trả lời nhanh chắc chắn không có mà không phải đọc đĩa. Nó hash phần tử vào một bit array; nếu có bit nào bằng 0 thì chắc chắn phần tử không tồn tại, còn nếu tất cả bằng 1 thì có thể có, đây là false positive. Đổi lại là tốn rất ít bộ nhớ so với việc giữ cả tập khoá."
     },
     {
       "id": "lsm-tree",
@@ -918,7 +946,8 @@
       "example": "Writes land in the memtable, get flushed into an SSTable, and compaction merges them later.",
       "viGloss": "cây gộp theo kiểu nhật ký",
       "shadowSentence": "Writes land in memory, then get flushed into a sorted string table.",
-      "domain": "data-structures"
+      "domain": "data-structures",
+      "brief": "Sinh ra để tối ưu write: thay vì cập nhật tại chỗ trên đĩa, mọi thay đổi vào memtable trong bộ nhớ rồi flush xuống thành SSTable bất biến, đã sắp xếp sẵn và chỉ ghi tuần tự. Đọc phải nhìn qua nhiều SSTable nên chậm hơn, và compaction chạy nền để gộp chúng lại. Đó là kiến trúc của RocksDB và Cassandra."
     },
     {
       "id": "hash-collision",
@@ -929,7 +958,8 @@
       "example": "When two keys land in the same bucket we chain them, so lookups degrade to scanning that bucket.",
       "viGloss": "hai khoá rơi vào cùng ô",
       "shadowSentence": "When two keys collide we chain them inside the same bucket.",
-      "domain": "data-structures"
+      "domain": "data-structures",
+      "brief": "Hash function ép không gian khoá vô hạn xuống số bucket hữu hạn, nên hai khoá khác nhau ra cùng một index là chuyện không tránh được. Hash table xử lý bằng chaining, nối thành list trong bucket, hoặc open addressing, dò sang ô kế. Khi collision nhiều thì lookup tụt từ O(1) về gần O(n), nên load factor rất quan trọng."
     },
     {
       "id": "skip-list",
@@ -940,7 +970,8 @@
       "example": "A skip list gives you sorted lookups without the rebalancing headache of a tree.",
       "viGloss": "danh sách có tầng nhảy",
       "shadowSentence": "A skip list lets you skip over most nodes on the way down.",
-      "domain": "data-structures"
+      "domain": "data-structures",
+      "brief": "Muốn tra cứu trên dữ liệu đã sắp xếp nhanh như balanced tree nhưng không muốn code phần xoay cây. Skip list là linked list có nhiều tầng: tầng trên bỏ qua nhiều phần tử để nhảy xa, tầng dưới đi chi tiết, mỗi node được lên tầng theo xác suất. Kết quả là O(log n) trung bình và dễ làm concurrent; Redis dùng nó cho sorted set."
     },
     {
       "id": "ring-buffer",
@@ -951,7 +982,8 @@
       "example": "We keep the last few minutes of events in a ring buffer, so the oldest entry just gets overwritten.",
       "viGloss": "bộ đệm vòng, ghi đè mục cũ",
       "shadowSentence": "The ring buffer wraps around and overwrites the oldest entry first.",
-      "domain": "data-structures"
+      "domain": "data-structures",
+      "brief": "Cần giữ N mục gần nhất mà không phải cấp phát bộ nhớ liên tục. Ring buffer là mảng cố định với hai con trỏ read và write chạy vòng lại đầu bằng phép modulo; khi đầy thì mục cũ nhất bị ghi đè. Rẻ và không tạo rác, nên hay gặp ở log gần đây, audio buffer, hay queue giữa một producer và một consumer."
     },
     {
       "id": "trie",
@@ -962,7 +994,8 @@
       "example": "Autocomplete uses a trie, so every key sharing a prefix sits on the same branch.",
       "viGloss": "cây tiền tố",
       "shadowSentence": "The autocomplete walks down a prefix tree, one letter at a time.",
-      "domain": "data-structures"
+      "domain": "data-structures",
+      "brief": "Tìm mọi từ bắt đầu bằng inv mà quét cả từ điển thì phí. Trie lưu ký tự trên cạnh chứ không lưu cả khoá trong node: các khoá cùng prefix dùng chung một nhánh, nên tra cứu tốn O(độ dài khoá) bất kể có bao nhiêu khoá. Đổi lại tốn bộ nhớ vì nhiều con trỏ, nên thực tế hay nén lại thành radix tree."
     }
   ]
 }
