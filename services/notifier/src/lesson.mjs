@@ -48,6 +48,95 @@ const isWritingDay = (now) => [1, 3, 5].includes(vnWeekday(now));
 const TASK_TYPES = ['shadow', 'answer', 'roleplay'];
 
 /**
+ * Scaffolding for the speaking task.
+ *
+ * A prompt on its own is not enough: being asked to talk for sixty seconds with
+ * nothing to hold onto is how a session ends in silence. Each task type gets a
+ * shape to follow and a few English phrases to reach for, plus the item's own
+ * collocations as the words to actually land.
+ *
+ * These are deliberately generic rather than authored per item. They are derived
+ * from data the curriculum already carries, so all 93 items got them at once, and
+ * a structure is what unblocks someone -- not a script.
+ *
+ * Switched off with SPEAKING_HINTS=off once they are no longer needed. That is a
+ * stack Parameter as well as an env var, per ADR 0006: a knob you would edit a
+ * file to change does not get changed.
+ */
+const HINTS = {
+  explain: {
+    shape: [
+      'Vấn đề nó giải quyết là gì?',
+      'Nó chạy thế nào — một câu thôi',
+      'Đánh đổi là gì?',
+      'Chỗ làm bạn dùng nó ở đâu?',
+    ],
+    phrases: [
+      'The problem it solves is…',
+      'Under the hood it…',
+      'The trade-off is that…',
+      'In our case we use it for…',
+    ],
+  },
+  roleplay: {
+    shape: [
+      'Tình hình: chuyện gì đang xảy ra',
+      'Ảnh hưởng: nó chặn ai, trễ cái gì',
+      'Bạn đang làm gì để xử lý',
+      'Bạn cần gì từ team',
+    ],
+    phrases: [
+      'Quick update on…',
+      'We are blocked on…',
+      'The impact is that…',
+      'What I need from you is…',
+    ],
+  },
+  answer: {
+    shape: [
+      'Chuyện xảy ra khi nào, ở đâu',
+      'Bạn đã làm gì',
+      'Kết quả ra sao',
+      'Lần sau bạn sẽ làm khác chỗ nào',
+    ],
+    phrases: [
+      'This happened a couple of weeks ago…',
+      'What I ended up doing was…',
+      'In the end…',
+      'Looking back, I would…',
+    ],
+  },
+};
+
+/** Words the learner should actually land, drawn from the items in play. */
+const keywordsFrom = (items) =>
+  [...new Set(items.flatMap((i) => i.collocations.slice(0, 2)))].slice(0, 5);
+
+function renderHints(task, focusPool) {
+  const hint = HINTS[task.type];
+  if (!hint) {
+    // `shadow` needs no scaffolding -- the sentence is already given. A
+    // pronunciation item gets a note on what is actually being listened for.
+    const focus = focusPool[0];
+    return focus?.tags.includes('pronunciation')
+      ? ['', '<i>Đọc chậm, rõ âm cuối. Máy nghe nhầm chỗ nào thì đó là chỗ cần sửa.</i>']
+      : [];
+  }
+
+  return [
+    '',
+    '<b>💡 Gợi ý — nói theo thứ tự này</b>',
+    ...hint.shape.map((line, i) => `${i + 1}. ${esc(line)}`),
+    '',
+    '<b>Mẫu câu</b>',
+    ...hint.phrases.map((phrase) => `· <i>${esc(phrase)}</i>`),
+    '',
+    `<b>Cụm cần dùng cho được:</b> ${esc(keywordsFrom(focusPool).join(' · '))}`,
+  ];
+}
+
+
+/**
  * Which speaking task today. Deterministic from the date so it rotates without
  * needing stored state, and so a test firing on the same day is reproducible.
  */
@@ -111,7 +200,7 @@ function renderWord(item, index) {
   ].join('\n');
 }
 
-function render({ now, environment, mode, review, fresh, task, writing }) {
+function render({ now, environment, mode, review, fresh, task, writing, hints = [] }) {
   const isProd = environment === 'prod';
   const lines = [];
 
@@ -142,6 +231,7 @@ function render({ now, environment, mode, review, fresh, task, writing }) {
 
   lines.push('<b>🎤 Nói</b>', esc(task.prompt));
   if (task.expectedText) lines.push('', `<b>“${esc(task.expectedText)}”</b>`);
+  lines.push(...hints);
 
   if (writing) {
     lines.push('', '<b>📝 Viết</b>', esc(writing));
@@ -166,6 +256,7 @@ export async function buildLesson({
   table = process.env.STUDY_TABLE,
   chatId = process.env.TELEGRAM_CHAT_ID,
   curriculum = allItems,
+  speakingHints = (process.env.SPEAKING_HINTS ?? 'on') !== 'off',
 } = {}) {
   const byId = new Map(curriculum.map((item) => [item.id, item]));
   const today = isoDate(now, TZ);
@@ -204,7 +295,8 @@ export async function buildLesson({
       ? `Viết 4–6 câu về một tình huống ở chỗ làm, dùng ít nhất ba cụm ở trên.`
       : null;
 
-  const text = render({ now, environment, mode: plan.mode, review, fresh, task, writing });
+  const hints = speakingHints ? renderHints(task, focusPool) : [];
+  const text = render({ now, environment, mode: plan.mode, review, fresh, task, writing, hints });
 
   if (stateful) {
     try {

@@ -40,6 +40,12 @@ Parameters:
       DynamoDB table owned by the study service, read through lesson.mjs to pick
       the day's words and to record the lesson that was actually sent.
 
+  SpeakingHints:
+    Type: String
+    Default: 'on'
+    AllowedValues: ['on', 'off']
+    Description: Set to off to drop the scaffolding under the speaking task.
+
   TokenParameterName:
     Type: String
     Default: /english-reminder/telegram-bot-token
@@ -76,6 +82,7 @@ Resources:
           SSM_TOKEN_PARAM: !Ref TokenParameterName
           ENVIRONMENT: !Ref EnvironmentName
           STUDY_TABLE: !Ref StudyTableName
+          SPEAKING_HINTS: !Ref SpeakingHints
       Policies:
         # Least-privilege: read access scoped to this app's parameter path only.
         - SSMParameterWithSlashPrefixReadPolicy:

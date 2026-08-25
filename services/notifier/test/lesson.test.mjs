@@ -126,3 +126,60 @@ test('technical shadow sentences spell acronyms out, so they can be said aloud',
     assert.doesNotMatch(item.shadowSentence, /\b[A-Z]{2,}\b/, `${item.id}: unsayable acronym`);
   }
 });
+
+test('a speaking task ships with a shape to follow, not just a prompt', async () => {
+  const { text } = await buildLesson({
+    now: new Date('2026-08-26T14:00:00Z'),
+    table: null,
+    curriculum: curriculum.filter((i) => i.tags.includes('tech')),
+  });
+
+  assert.match(text, /Gợi ý/);
+  assert.match(text, /The problem it solves is/, 'model phrases should be there to borrow');
+  assert.match(text, /Cụm cần dùng cho được/, 'and the words to actually land');
+});
+
+test('the scaffolding can be switched off without touching the lesson', async () => {
+  const args = {
+    now: new Date('2026-08-26T14:00:00Z'),
+    table: null,
+    curriculum: curriculum.filter((i) => i.tags.includes('tech')),
+  };
+  const on = await buildLesson({ ...args, speakingHints: true });
+  const off = await buildLesson({ ...args, speakingHints: false });
+
+  assert.doesNotMatch(off.text, /Gợi ý/);
+  // The lesson itself is untouched -- only the scaffolding goes.
+  assert.match(off.text, /🎤 Nói/);
+  assert.ok(off.text.length < on.text.length);
+});
+
+test('SPEAKING_HINTS=off is honoured from the environment', async () => {
+  const previous = process.env.SPEAKING_HINTS;
+  process.env.SPEAKING_HINTS = 'off';
+  try {
+    const { text } = await buildLesson({ now: new Date('2026-08-26T14:00:00Z'), table: null });
+    assert.doesNotMatch(text, /Gợi ý/);
+  } finally {
+    if (previous === undefined) delete process.env.SPEAKING_HINTS;
+    else process.env.SPEAKING_HINTS = previous;
+  }
+});
+
+test('reading a given sentence aloud gets no scaffolding, since there is nothing to invent', async () => {
+  // Force a shadow task by handing the selector a single non-tech item.
+  const one = curriculum.find((i) => !i.tags.includes('tech') && !i.tags.includes('pronunciation'));
+  let sawShadow = false;
+  for (const day of ['2026-08-24', '2026-08-25', '2026-08-26']) {
+    const { text } = await buildLesson({
+      now: new Date(`${day}T14:00:00Z`),
+      table: null,
+      curriculum: [one],
+    });
+    if (/Đọc to câu này/.test(text)) {
+      sawShadow = true;
+      assert.doesNotMatch(text, /Gợi ý — nói theo thứ tự/);
+    }
+  }
+  assert.ok(sawShadow, 'the rotation never produced a shadow task to check');
+});

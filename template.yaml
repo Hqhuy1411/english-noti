@@ -36,6 +36,15 @@ Parameters:
       Set DISABLED to park the test environment: the function stays invokable on
       demand, but nothing fires on a clock.
 
+  SpeakingHints:
+    Type: String
+    Default: 'on'
+    AllowedValues: ['on', 'off']
+    Description: >
+      Whether the speaking task carries scaffolding -- a shape to follow, model
+      phrases, and the collocations to land. Turn it off once the prompt alone is
+      enough. A Parameter rather than a code edit, per ADR 0006.
+
   LogRetentionDays:
     Type: Number
     Default: 30
@@ -57,6 +66,7 @@ Resources:
         EnvironmentName: prod
         TelegramChatId: !Ref TelegramChatId
         StudyTableName: !GetAtt Study.Outputs.TableName
+        SpeakingHints: !Ref SpeakingHints
         ScheduleExpression: !Ref ProdScheduleExpression
         ScheduleState: ENABLED
         LogRetentionDays: !Ref LogRetentionDays
@@ -69,6 +79,7 @@ Resources:
         EnvironmentName: test
         TelegramChatId: !Ref TelegramChatId
         StudyTableName: !GetAtt Study.Outputs.TableName
+        SpeakingHints: !Ref SpeakingHints
         ScheduleExpression: !Ref TestScheduleExpression
         ScheduleState: !Ref TestScheduleState
         LogRetentionDays: !Ref LogRetentionDays
