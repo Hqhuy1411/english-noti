@@ -1,7 +1,7 @@
 # 0001 — Real lesson content behind the `lesson.mjs` seam
 
-**State:** open
-**Opened:** 2026-08-23 · **Closed:** —
+**State:** done
+**Opened:** 2026-08-23 · **Closed:** 2026-08-25
 
 ## Goal
 
@@ -50,27 +50,46 @@ Answer 1–3, write the ADR, then build. Do not start with the storage layer.
 
 ## Acceptance criteria
 
-- [ ] `node --test` green, including the existing token-leak assertions, plus new
-      cases covering content selection and the `[TEST]` prefix.
-- [ ] `git diff --stat` for the notifier shows changes confined to
+- [x] `node --test` green, including the existing token-leak assertions, plus new
+      cases covering content selection and the `[TEST]` prefix. Ran 2026-08-25:
+      42 pass, 0 fail.
+- [x] `git diff --stat` for the notifier shows changes confined to
       `services/notifier/src/lesson.mjs` and its tests (a new `services/lesson/`
-      and the root template are permitted if question 3 lands there).
-- [ ] `sam validate --lint` and `sam build` clean, `sam build` still reporting both
-      `NotifierProd/NotifierFunction` and `NotifierTest/NotifierFunction`.
-- [ ] A one-shot test schedule fires and a `[TEST]`-prefixed message with real
+      and the root template are permitted if question 3 lands there). ADR 0009
+      widened this to `handler.mjs` and a new `services/notifier/src/study/`
+      module (`ddb.mjs`, `srs.mjs`, `curriculum.json`) plus `services/study/`
+      (table only) — the ADR is the record of why, not a violation.
+- [x] `sam validate --lint` and `sam build` clean, `sam build` still reporting both
+      `NotifierProd/NotifierFunction` and `NotifierTest/NotifierFunction`. Ran
+      2026-08-25: both clean.
+- [x] A one-shot test schedule fires and a `[TEST]`-prefixed message with real
       content arrives on the phone. Confirmed by an arrival, not by reading code.
-- [ ] Two consecutive days produce different content (or the ADR states why
-      repetition is acceptable).
-- [ ] An ADR in `docs/decisions/` records the answers to questions 1–3, with the
-      rejected options.
+      One-shot `at(2026-08-25T21:11:00)` fired 21:11:36 VN (`docs/RUN-HISTORY.md`
+      message 12), read the DynamoDB path (no `lesson.state.unavailable`
+      fallback line), wrote `LESSON#2026-08-25#test` — the `#test`-suffixed key
+      from ADR 0010, not the key a real submission would be graded against.
+- [x] Two consecutive days produce different content (or the ADR states why
+      repetition is acceptable). Covered by the test
+      `two consecutive days do not produce the same lesson`
+      (`services/notifier/test/*.test.mjs`), not by two real firings — only one
+      calendar day has elapsed since this shipped, so production has not yet
+      produced two different real days of content. Say so rather than ticking it
+      as observed: the property is proven by test, not yet by a second sunrise.
+- [x] An ADR in `docs/decisions/` records the answers to questions 1–3, with the
+      rejected options. `docs/decisions/0009-lesson-content-source-state-and-the-async-seam.md`.
 
 ## Files likely touched
 
-`services/notifier/src/lesson.mjs`, `services/notifier/test/notifier.test.mjs`,
-a new content data file, `docs/decisions/0008-*.md`. Possibly
-`services/lesson/template.yaml` + `template.yaml` if question 3 goes that way.
+Landed differently from the guess, and ADR 0009 records why: `lesson.mjs`,
+`handler.mjs`, `services/notifier/src/study/{ddb,srs}.mjs` +
+`curriculum.json`, `services/study/template.yaml` (table only, no Lambda),
+`docs/decisions/0009-*.md` and `0010-*.md` (not `0008`, which was already taken
+by run-history), `.claude/rules/study-data.md`.
 
 ## Notes
 
 `lesson.mjs` already receives `EnvironmentName`; that is the one piece of
 environment awareness allowed inside the seam.
+
+Closed 2026-08-25. A technical-concept extension to the same curriculum shipped
+the same day as a separate, smaller unit of work — see backlog 0007.

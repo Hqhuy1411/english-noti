@@ -139,7 +139,12 @@ execution role narrowly even while the deploying principal is broad.
   the least-privilege set this stack actually needs, `docs/RUNBOOK.md` §4 has the
   reasoning, and `docs/DEPLOY-LOG.md` records which were missing and how each was
   found. Read those three before re-deriving anything — the discovery took six
-  deploy rounds.
+  deploy rounds. But a statement present in that file is not evidence anyone
+  attached it to the deploying user — `docs/aws-permissions.json` documents what
+  is needed, it does not grant anything by existing. `docs/DEPLOY-LOG.md` Round 8
+  is the same read-back trap (below) recurring for DynamoDB *after* the
+  permission had already been written down but before it was ever applied to
+  `huy-macair`. Check the actual attached policy, not the file that describes it.
 - **KMS needs no explicit statement here.** With a SecureString on the default
   `alias/aws/ssm` key, no `kms:Decrypt` statement is needed in the function's
   policy: that key's policy already grants the account access via `kms:ViaService`.

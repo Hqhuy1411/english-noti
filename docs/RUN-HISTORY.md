@@ -30,3 +30,4 @@ For deploys rather than runs, see `docs/DEPLOY-LOG.md`.
 | 2026-08-24 21:00:06 | prod | scheduled | sent | message 10 | 3989 ms | e76a8c4e-6032-4d21-842e-7244b7cbc3e2 |
 | 2026-08-25 21:00:06 | prod | scheduled | sent | message 11 | 4190 ms | e76a8d9f-e032-4d21-842e-7244b7cbc3e2 |
 | 2026-08-25 21:11:36 | test | scheduled | sent | message 12 | 4620 ms | dc6a8da2-74d4-4e50-aca6-7cea489165f8 |
+| 2026-08-25 21:21:36 | test | scheduled | sent | message 13 | 4741 ms | 426a8da4-cca5-49b7-975d-5c690e60fdd5 |

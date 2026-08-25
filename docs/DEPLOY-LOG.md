@@ -191,6 +191,39 @@ Three things learned here, each correcting an earlier assumption:
   will not fire again, but do not read a lingering ENABLED one-shot as pending
   work. `ActionAfterCompletion: DELETE` would clean it up if that ever matters.
 
+### Round 8 (2026-08-25) — the study table's `DescribeTable`, and documentation is not a grant
+
+Adding `services/study/`'s table (backlog 0001 / ADR 0009) reproduced the exact
+shape of Round 5's trap: CloudFormation creates the resource, then reads it back,
+and read-back is a separate permission from create.
+
+```
+User huy-macair is not authorized to perform: dynamodb:DescribeTable on resource:
+arn:aws:dynamodb:ap-southeast-1:655954777441:table/english-reminder-study
+```
+
+`dynamodb:CreateTable` was allowed; `dynamodb:DescribeTable` was not, so the
+create succeeded and the read-back failed, surfacing as `CREATE_FAILED` on
+`StudyTable`.
+
+What makes this worth its own entry rather than a line under Round 5: **the
+permission was already written down.** The `StudyTable` / `StudyTableList`
+statements — fourteen control-plane actions, including `DescribeTable` — were
+added to `docs/aws-permissions.json` in commit `a0da6f7`, before this deploy was
+attempted. The rollback happened anyway, because that file documents what the
+stack needs; it does not attach anything to an IAM identity. Nobody had applied
+it to `huy-macair`. Writing a permission down and granting it are two different
+actions, and only one of them was done.
+
+Fixed with an inline policy on `huy-macair`, `english-reminder-study-table`: the
+`StudyTable` statement's fourteen actions, scoped to
+`arn:aws:dynamodb:ap-southeast-1:655954777441:table/english-reminder-study`, plus
+`dynamodb:ListTables` on `*` (cannot be scoped to one table — same shape as
+`scheduler:ListSchedules` in Round 6). `dynamodb:GetItem` and `dynamodb:Query`
+were added afterwards, read-only, so the table could be inspected without a
+redeploy. Second attempt succeeded: `english-reminder-study` is `ACTIVE`,
+`PAY_PER_REQUEST`, with `GSI1` (ADR 0010).
+
 ### Lesson: enumerate, do not iterate
 
 Five deploys were spent discovering permissions one at a time, because each
@@ -213,6 +246,7 @@ deploy as a permission discovery tool.
 | S3 | SAM artifact bucket + uploads | ✅ granted in round 4 via `AmazonS3FullAccess` |
 | IAM | Lambda + scheduler execution roles | ✅ granted in round 5 via `IAMFullAccess` |
 | EventBridge Scheduler | create **and read back** the schedule | ✅ granted in round 6 via `AmazonEventBridgeSchedulerFullAccess` |
+| DynamoDB | create **and read back** (`DescribeTable`) the study table | ⚠️ documented in `docs/aws-permissions.json` since it was written, not actually granted until round 8 — ✅ granted via inline policy `english-reminder-study-table` |
 
 Note that "EventBridge Scheduler present from the start" in the round-1 table was
 wrong: `CreateSchedule` was allowed while `GetSchedule` was not. Treat a service
@@ -240,6 +274,11 @@ Stack `english-reminder` is live in `ap-southeast-1`, with two nested stacks:
 |---|---|---|---|
 | prod | `english-reminder-notifier-prod` | `/aws/lambda/english-reminder-notifier-prod` | `english-reminder-prod`, `cron(0 21 * * ? *)` |
 | test | `english-reminder-notifier-test` | `/aws/lambda/english-reminder-notifier-test` | `english-reminder-test`, one-shot `at(...)` |
+
+Plus, since Round 8, the `services/study/` nested stack: table
+`english-reminder-study`, `ACTIVE`, `PAY_PER_REQUEST`, index `GSI1` (key schema
+in ADR 0010). No Lambda of its own — both notifier environments read/write it
+in-process via `services/notifier/src/study/ddb.mjs`.
 
 Also live, and deliberately outside the stack:
 

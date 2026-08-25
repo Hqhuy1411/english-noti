@@ -50,9 +50,17 @@ Do not swallow errors to make a run look clean.
 
 ## Phase 2 seam
 
-`lesson.mjs` is the **only** file that changes when real lesson content arrives.
-Scheduling, delivery and logging stay untouched. Keep the seam that narrow; see
-`docs/decisions/0007`.
+`lesson.mjs` is where lesson content is built, and the seam is kept deliberately
+narrow: scheduling, delivery and logging stay untouched. See
+**`docs/decisions/0009`**, which supersedes 0007.
+
+0007 said `lesson.mjs` was the *only* file Phase 2 would touch. That did not
+survive: content is async, so `handler.mjs` awaits `buildLesson()` (an import
+rename plus a two-line call site), and `telegram.mjs` gains an optional
+`replyMarkup` parameter when ticket 0003 has something to receive a button press.
+Both were amended in the open through 0009 rather than widened quietly -- which is
+what 0007 asked for. Anything further reaching outside `lesson.mjs` deserves the
+same treatment.
 
 ## Code style
 
