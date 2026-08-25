@@ -49,6 +49,7 @@ which is why retention is capped.
 | `docs/backlog/` | Work items as numbered markdown files, with acceptance criteria. |
 | `docs/RUNBOOK.md` | Every build, deploy, verify, operate and teardown command. |
 | `docs/DEPLOY-LOG.md` | What was actually deployed, and what blocked it. |
+| `docs/aws-billing-permissions.json` | What to grant to read the bill. The deploy user deliberately cannot. |
 | `docs/RUN-HISTORY.md` | Every run the reminder has made. The durable record -- CloudWatch only keeps 30 days. |
 
 ## First-time setup

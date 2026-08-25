@@ -24,6 +24,7 @@ holds only what is true everywhere. Everything else loads when it is relevant.
 | What was actually deployed, and what blocked it | `docs/DEPLOY-LOG.md` |
 | Did it actually fire, on which nights, and did it send | `docs/RUN-HISTORY.md` |
 | Least-privilege deploy permissions | `docs/aws-permissions.json` |
+| Permissions needed to *see the bill* (deploy user cannot) | `docs/aws-billing-permissions.json` |
 | Rules for templates / runtime code / tests | `.claude/rules/` — path-scoped, load themselves |
 | A deploy rolled back, or a permission is suspect | `cfn-deploy-triage` skill |
 | A Telegram message did not arrive | `telegram-bot-ops` skill |

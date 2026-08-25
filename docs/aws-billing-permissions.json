@@ -1,0 +1,20 @@
+{
+  "Comment": "Read-only cost visibility for the deploying IAM user. Deliberately NOT part of aws-permissions.json, which stays a deploy-only policy. Attach the two AWS managed policies first -- AWSBillingReadOnlyAccess and AWSPriceListServiceFullAccess -- then this, which is only the remainder they do not carry (verified 2026-08-24: ce:GetCostForecast is absent even from job-function/Billing). NOTHING here works until the root user enables 'IAM user and role access to Billing information' in Account Settings; without that toggle every call still returns AccessDeniedException, which is indistinguishable from a missing policy. Strip this Comment key before submitting -- see docs/RUNBOOK.md section 8.",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CostForecastAndOptimisation",
+      "Effect": "Allow",
+      "Action": [
+        "ce:GetCostForecast",
+        "ce:GetUsageForecast",
+        "cost-optimization-hub:ListRecommendations",
+        "cost-optimization-hub:GetRecommendation",
+        "cost-optimization-hub:ListEnrollmentStatuses",
+        "compute-optimizer:GetLambdaFunctionRecommendations",
+        "compute-optimizer:GetEnrollmentStatus"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

@@ -293,6 +293,53 @@ sam deploy --no-confirm-changeset --parameter-overrides \
 Cron fields are `minute hour day-of-month month day-of-week year`, evaluated in
 `Asia/Ho_Chi_Minh`. Never convert to UTC by hand.
 
+**See what the account costs.** The deploying identity deliberately cannot --
+`aws-permissions.json` grants deploy rights only. Every billing call
+(`ce:GetCostAndUsage`, `budgets:ViewBudget`, `freetier:GetFreeTierUsage`,
+`billing:ListBillingViews`, `pricing:GetProducts`) returns `AccessDeniedException`
+until two things are done, **in this order**:
+
+1. **As the root user**, Account Settings → enable **"IAM user and role access to
+   Billing information"**. This is account-level and cannot be granted by any IAM
+   policy. Skip it and every grant below stays inert, failing with the same
+   `AccessDeniedException` as a missing policy — indistinguishable, and the usual
+   reason this takes an afternoon.
+2. Attach to the IAM user:
+   - `arn:aws:iam::aws:policy/AWSBillingReadOnlyAccess` — Cost Explorer,
+     budgets, free tier, invoices
+   - `arn:aws:iam::aws:policy/AWSPriceListServiceFullAccess` — unit-price lookups
+   - `docs/aws-billing-permissions.json` as an inline policy, for the handful of
+     actions **no** managed policy carries (verified 2026-08-24), notably
+     `ce:GetCostForecast`
+
+   From an identity that can edit IAM — **not** the deploying user, which has no
+   `iam:AttachUserPolicy`:
+
+   ```sh
+   aws iam attach-user-policy --user-name huy-macair \
+     --policy-arn arn:aws:iam::aws:policy/AWSBillingReadOnlyAccess
+   aws iam attach-user-policy --user-name huy-macair \
+     --policy-arn arn:aws:iam::aws:policy/AWSPriceListServiceFullAccess
+
+   # The Comment key must be stripped -- IAM rejects unknown top-level keys.
+   python3 -c "import json;d=json.load(open('docs/aws-billing-permissions.json'));d.pop('Comment');print(json.dumps(d))" > /tmp/billing.json
+   aws iam put-user-policy --user-name huy-macair \
+     --policy-name BillingReadCostForecast --policy-document file:///tmp/billing.json
+   ```
+
+Then:
+
+```sh
+aws ce get-cost-and-usage --time-period Start=2026-08-01,End=2026-09-01 \
+  --granularity MONTHLY --metrics UnblendedCost \
+  --group-by Type=DIMENSION,Key=SERVICE --region us-east-1
+```
+
+**Cost Explorer's API bills about $0.01 per request** while the console is free.
+This project costs roughly $0.0005 a month, so a dozen API calls cost more than a
+year of running it. Use the console for browsing; use the API when a script needs
+the number.
+
 **Rotate the bot token** (do this if the token was ever pasted into a chat, a
 ticket, or a shared log):
 
