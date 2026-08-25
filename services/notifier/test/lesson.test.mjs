@@ -1,0 +1,106 @@
+/**
+ * The lesson seam (ADR 0009). These run with no AWS credentials and no
+ * node_modules, which is itself part of what is being tested: the fallback path
+ * has to work when DynamoDB is not reachable, and locally it never is.
+ */
+
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+
+import { buildLesson } from '../src/lesson.mjs';
+
+const curriculum = JSON.parse(
+  await readFile(new URL('../src/study/curriculum.json', import.meta.url), 'utf8'),
+).items;
+
+/**
+ * Silence the log line the fallback path emits, and hand back what it said.
+ * logger.mjs sends WARN to stdout -- only ERROR goes to stderr.
+ */
+async function captureLogs(fn) {
+  const written = [];
+  const outWrite = process.stdout.write;
+  const errWrite = process.stderr.write;
+  process.stdout.write = (chunk) => (written.push(String(chunk)), true);
+  process.stderr.write = (chunk) => (written.push(String(chunk)), true);
+  try {
+    return { result: await fn(), logs: written.join('') };
+  } finally {
+    process.stdout.write = outWrite;
+    process.stderr.write = errWrite;
+  }
+}
+
+const WED = new Date('2026-08-26T14:00:00Z'); // Wednesday 21:00 in Vietnam
+const TUE = new Date('2026-08-25T14:00:00Z'); // Tuesday 21:00 in Vietnam
+
+test('the message carries real vocabulary, not a placeholder', async () => {
+  const { text } = await buildLesson({ now: WED, table: null });
+
+  const words = curriculum.filter((item) => text.includes(item.word));
+  assert.ok(words.length >= 1, 'no curriculum word appeared in the message');
+  // The old Phase 1 placeholder must be gone for good.
+  assert.doesNotMatch(text, /Phase 2/);
+});
+
+test('a lesson always includes something to say out loud', async () => {
+  const { text } = await buildLesson({ now: WED, table: null });
+  assert.match(text, /🎤 Nói/);
+});
+
+test('the [TEST] label survives the real content', async () => {
+  const { text } = await buildLesson({ now: WED, environment: 'test', table: null });
+  assert.match(text, /\[TEST\]/);
+  const words = curriculum.filter((item) => text.includes(item.word));
+  assert.ok(words.length >= 1, 'a test message should carry real content too');
+});
+
+test('a test firing files its lesson under a separate key from prod', async () => {
+  const prod = await buildLesson({ now: WED, environment: 'prod', table: null });
+  const testEnv = await buildLesson({ now: WED, environment: 'test', table: null });
+
+  assert.equal(prod.lessonId, 'LESSON#2026-08-26');
+  assert.equal(testEnv.lessonId, 'LESSON#2026-08-26#test');
+  assert.notEqual(prod.lessonId, testEnv.lessonId);
+});
+
+test('two consecutive days do not send the same message', async () => {
+  const tue = await buildLesson({ now: TUE, table: null });
+  const wed = await buildLesson({ now: WED, table: null });
+  assert.notEqual(tue.text, wed.text);
+});
+
+test('a send still happens when the state store is unreachable', async () => {
+  // A table name is configured but the SDK/table is not available -- exactly the
+  // shape of a real outage, and the reason ADR 0009 forbids a content failure
+  // from becoming a send failure.
+  const { result, logs } = await captureLogs(() =>
+    buildLesson({ now: WED, table: 'no-such-table', chatId: '123456' }),
+  );
+
+  assert.ok(result.text.length > 0, 'a message must still be produced');
+  const words = curriculum.filter((item) => result.text.includes(item.word));
+  assert.ok(words.length >= 1, 'the fallback must still carry real vocabulary');
+  assert.match(logs, /lesson\.state\.unavailable/, 'the failure must be logged, not hidden');
+});
+
+test('curriculum content is escaped, so a stray bracket cannot break parse_mode', async () => {
+  const { text } = await buildLesson({ now: WED, table: null });
+  // Our own markup is the only source of tags; strip it and nothing raw is left.
+  const stripped = text.replaceAll(/<\/?(b|i)>/g, '');
+  assert.doesNotMatch(stripped, /[<>]/);
+});
+
+test('writing appears on a writing day and not on the days between', async () => {
+  const wed = await buildLesson({ now: WED, table: null });
+  const tue = await buildLesson({ now: TUE, table: null });
+  assert.match(wed.text, /📝 Viết/);
+  assert.doesNotMatch(tue.text, /📝 Viết/);
+});
+
+test('the seam returns the shape ADR 0009 specifies', async () => {
+  const lesson = await buildLesson({ now: WED, table: null });
+  assert.deepEqual(Object.keys(lesson).sort(), ['lessonId', 'replyMarkup', 'text']);
+  assert.equal(lesson.replyMarkup, null, 'no keyboard until the coach service exists');
+});

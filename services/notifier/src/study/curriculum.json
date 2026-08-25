@@ -1,0 +1,605 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "circle-back",
+      "word": "circle back",
+      "pos": "verb",
+      "tags": ["work"],
+      "collocations": ["circle back on that", "circle back after lunch", "circle back next week"],
+      "example": "Let's circle back on the pricing logic once we hear from the legal team.",
+      "viGloss": "quay lại bàn tiếp sau",
+      "shadowSentence": "Let us circle back on that question after the release goes out."
+    },
+    {
+      "id": "give-someone-a-heads-up",
+      "word": "give someone a heads-up",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["a quick heads-up", "just a heads-up", "give the team a heads-up first"],
+      "example": "Just a heads-up, the staging database will be down for about an hour.",
+      "viGloss": "báo trước cho ai đó",
+      "shadowSentence": "I always try to give someone a heads-up before changing shared code."
+    },
+    {
+      "id": "scope-creep",
+      "word": "scope creep",
+      "pos": "noun",
+      "tags": ["work"],
+      "collocations": ["a bit of scope creep", "avoid scope creep", "scope creep on the project"],
+      "example": "This started as a small fix, but honestly it is turning into scope creep.",
+      "viGloss": "phình phạm vi công việc",
+      "shadowSentence": "We need to watch out for scope creep before the sprint gets away."
+    },
+    {
+      "id": "push-back-on",
+      "word": "push back on",
+      "pos": "verb",
+      "tags": ["work"],
+      "collocations": ["push back on a deadline", "push back on the estimate", "push back politely"],
+      "example": "I pushed back on the deadline because the testing window was way too short.",
+      "viGloss": "phản đối, không đồng ý một cách lịch sự",
+      "shadowSentence": "I want to push back on that deadline in a polite way."
+    },
+    {
+      "id": "be-blocked-on",
+      "word": "be blocked on",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["blocked on a review", "blocked on access", "still blocked on that ticket"],
+      "example": "I am blocked on the API keys, so nothing moves until someone grants access.",
+      "viGloss": "bị kẹt vì phải chờ thứ khác",
+      "shadowSentence": "It is easy to be blocked on a review for a whole day."
+    },
+    {
+      "id": "loop-in",
+      "word": "loop in",
+      "pos": "verb",
+      "tags": ["work"],
+      "collocations": ["loop in the design team", "loop me in", "loop in someone from support"],
+      "example": "Can you loop me in on that thread? I own the payment service now.",
+      "viGloss": "cho ai đó vào cuộc, cc vào",
+      "shadowSentence": "Please loop in the design team before we agree on the final layout."
+    },
+    {
+      "id": "take-a-stab-at",
+      "word": "take a stab at",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["take a stab at the estimate", "take a first stab at it", "take a stab at a fix"],
+      "example": "I will take a stab at the migration script tonight and share it tomorrow.",
+      "viGloss": "thử làm cái gì đó",
+      "shadowSentence": "Let me take a stab at the first draft and share it later."
+    },
+    {
+      "id": "ballpark-figure",
+      "word": "ballpark figure",
+      "pos": "noun",
+      "tags": ["work"],
+      "collocations": ["give a ballpark figure", "just a ballpark figure", "a rough ballpark"],
+      "example": "I cannot commit yet, but a ballpark figure would be about three weeks.",
+      "viGloss": "con số ước chừng",
+      "shadowSentence": "Could you give me a ballpark figure before the planning meeting today?"
+    },
+    {
+      "id": "sign-off-on",
+      "word": "sign off on",
+      "pos": "verb",
+      "tags": ["work"],
+      "collocations": ["sign off on the design", "sign off on the release", "wait for sign-off"],
+      "example": "Nobody wants to sign off on this until the security review comes back.",
+      "viGloss": "duyệt, chấp thuận",
+      "shadowSentence": "The team lead has to sign off on the change before we release."
+    },
+    {
+      "id": "edge-case",
+      "word": "edge case",
+      "pos": "noun",
+      "tags": ["work"],
+      "collocations": ["a nasty edge case", "handle the edge case", "an edge case in the form"],
+      "example": "That is a weird edge case, but it happens whenever the file is empty.",
+      "viGloss": "trường hợp biên hiếm gặp",
+      "shadowSentence": "There is one edge case we should handle before we call it done."
+    },
+    {
+      "id": "low-hanging-fruit",
+      "word": "low-hanging fruit",
+      "pos": "noun",
+      "tags": ["work"],
+      "collocations": ["grab the low-hanging fruit", "some low-hanging fruit", "obvious low-hanging fruit"],
+      "example": "Let's grab the low-hanging fruit first and show something working by Friday.",
+      "viGloss": "việc dễ làm mà hiệu quả nhanh",
+      "shadowSentence": "There is a lot of low-hanging fruit in the older reporting code."
+    },
+    {
+      "id": "boil-it-down",
+      "word": "boil it down",
+      "pos": "verb",
+      "tags": ["work"],
+      "collocations": ["boil it down to one point", "boil down the problem", "boil it down for the client"],
+      "example": "If I boil it down, we are paying for a database we barely use.",
+      "viGloss": "tóm gọn lại cho dễ hiểu",
+      "shadowSentence": "Let me boil it down so the sales team can follow the reason."
+    },
+    {
+      "id": "in-the-weeds",
+      "word": "in the weeds",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["get in the weeds", "deep in the weeds", "too far in the weeds"],
+      "example": "We are getting in the weeds here. Can we agree on the approach first?",
+      "viGloss": "sa vào chi tiết vụn vặt",
+      "shadowSentence": "We are getting in the weeds and the meeting is almost over."
+    },
+    {
+      "id": "follow-up-on",
+      "word": "follow up on",
+      "pos": "verb",
+      "tags": ["work"],
+      "collocations": ["follow up on an email", "follow up on the ticket", "follow up on a request"],
+      "example": "I will follow up on that email if I do not hear back by Thursday.",
+      "viGloss": "theo dõi, hỏi lại tiến độ",
+      "shadowSentence": "I will follow up on the open questions right after the standup."
+    },
+    {
+      "id": "run-it-by",
+      "word": "run it by",
+      "pos": "verb",
+      "tags": ["work"],
+      "collocations": ["run it by the team", "run it by your manager", "run it by me first"],
+      "example": "Let me run it by my manager before I promise anything about the date.",
+      "viGloss": "hỏi ý kiến ai đó trước",
+      "shadowSentence": "Let me run it by the team lead before we ship anything today."
+    },
+    {
+      "id": "flag-an-issue",
+      "word": "flag an issue",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["flag an issue early", "flag it for the team", "flag a risk"],
+      "example": "I want to flag an issue with the report totals before we launch this.",
+      "viGloss": "nêu vấn đề, cảnh báo sớm",
+      "shadowSentence": "It is better to flag an issue early than to explain it later."
+    },
+    {
+      "id": "on-the-same-page",
+      "word": "on the same page",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["get on the same page", "all on the same page", "not on the same page"],
+      "example": "Before we start building, I want to be sure we are on the same page.",
+      "viGloss": "hiểu ý nhau, thống nhất quan điểm",
+      "shadowSentence": "I want to be sure that we are on the same page here."
+    },
+    {
+      "id": "have-the-bandwidth",
+      "word": "have the bandwidth",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["not have the bandwidth", "have the bandwidth for it", "bandwidth this week"],
+      "example": "I do not have the bandwidth for another project until this release is out.",
+      "viGloss": "còn đủ thời gian và sức để làm",
+      "shadowSentence": "I do not have the bandwidth to take another task this week."
+    },
+    {
+      "id": "nail-down",
+      "word": "nail down",
+      "pos": "verb",
+      "tags": ["work"],
+      "collocations": ["nail down the requirements", "nail down a date", "nail down the details"],
+      "example": "Can we nail down the requirements today? I keep rewriting the same code.",
+      "viGloss": "chốt lại cho rõ ràng",
+      "shadowSentence": "Let us nail down the requirements before anyone writes a line of code."
+    },
+    {
+      "id": "drop-the-ball",
+      "word": "drop the ball",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["drop the ball on something", "really drop the ball", "not drop the ball again"],
+      "example": "I dropped the ball on that ticket, sorry. I will get it out today.",
+      "viGloss": "làm lỡ việc, quên trách nhiệm",
+      "shadowSentence": "I do not want to drop the ball on this one again."
+    },
+    {
+      "id": "get-up-to-speed",
+      "word": "get up to speed",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["get up to speed on a project", "get someone up to speed", "quickly get up to speed"],
+      "example": "Give me a day to get up to speed on the payments code, please.",
+      "viGloss": "nắm bắt tình hình, bắt nhịp công việc",
+      "shadowSentence": "I need one more day to get up to speed on this service."
+    },
+    {
+      "id": "walk-through",
+      "word": "walk through",
+      "pos": "verb",
+      "tags": ["work"],
+      "collocations": ["walk through the design", "walk someone through the code", "walk through it step by step"],
+      "example": "Let me walk you through the flow quickly, then you can ask anything.",
+      "viGloss": "hướng dẫn từng bước",
+      "shadowSentence": "I will walk through the design once more so everyone follows it."
+    },
+    {
+      "id": "technical-debt",
+      "word": "technical debt",
+      "pos": "noun",
+      "tags": ["work"],
+      "collocations": ["pay down technical debt", "a lot of technical debt", "technical debt in the codebase"],
+      "example": "We can ship it now, but we are taking on real technical debt here.",
+      "viGloss": "nợ kỹ thuật",
+      "shadowSentence": "We should pay down some technical debt before we add new features."
+    },
+    {
+      "id": "cut-scope",
+      "word": "cut scope",
+      "pos": "verb",
+      "tags": ["work"],
+      "collocations": ["cut scope to hit the date", "cut some scope", "cut scope instead of quality"],
+      "example": "If the date cannot move, we have to cut scope somewhere. Your call.",
+      "viGloss": "cắt bớt phạm vi công việc",
+      "shadowSentence": "We can cut scope or move the date, but not keep both."
+    },
+    {
+      "id": "hop-on-a-call",
+      "word": "hop on a call",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["hop on a quick call", "hop on a call later", "hop on with the client"],
+      "example": "This is hard over chat. Can we hop on a call for ten minutes?",
+      "viGloss": "nhảy vào một cuộc gọi nhanh",
+      "shadowSentence": "Can we hop on a call and sort this out in five minutes?"
+    },
+    {
+      "id": "keep-you-posted",
+      "word": "keep you posted",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["keep you posted on progress", "keep the team posted", "keep me posted"],
+      "example": "I will keep you posted as soon as the vendor answers my email.",
+      "viGloss": "cập nhật tình hình liên tục cho bạn",
+      "shadowSentence": "I will keep you posted as soon as the review is finished."
+    },
+    {
+      "id": "slip-through-the-cracks",
+      "word": "slip through the cracks",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["let it slip through the cracks", "a ticket slipped through the cracks", "nothing slips through the cracks"],
+      "example": "That request slipped through the cracks while I was out last week, sorry.",
+      "viGloss": "bị bỏ sót",
+      "shadowSentence": "Small requests often slip through the cracks when nobody owns the list."
+    },
+    {
+      "id": "have-a-different-take",
+      "word": "have a different take",
+      "pos": "phrase",
+      "tags": ["work"],
+      "collocations": ["have a different take on it", "a slightly different take", "my take on this"],
+      "example": "I have a different take on this, but I might be missing some context.",
+      "viGloss": "có quan điểm khác",
+      "shadowSentence": "I have a different take on this, and I would like to explain."
+    },
+    {
+      "id": "run-late",
+      "word": "run late",
+      "pos": "verb",
+      "tags": ["daily"],
+      "collocations": ["running a bit late", "run late for a meeting", "always run late"],
+      "example": "Sorry, I am running late. The traffic near the bridge is terrible today.",
+      "viGloss": "bị trễ giờ",
+      "shadowSentence": "I am going to run late because the traffic is really bad."
+    },
+    {
+      "id": "grab-a-bite",
+      "word": "grab a bite",
+      "pos": "phrase",
+      "tags": ["daily"],
+      "collocations": ["grab a bite after work", "grab a quick bite", "grab a bite together"],
+      "example": "Want to grab a bite before the movie? There is a noodle place nearby.",
+      "viGloss": "ăn nhanh cái gì đó",
+      "shadowSentence": "Do you want to grab a bite before we head back to work?"
+    },
+    {
+      "id": "hang-out",
+      "word": "hang out",
+      "pos": "verb",
+      "tags": ["daily"],
+      "collocations": ["hang out with friends", "hang out at home", "hang out for a bit"],
+      "example": "We just hung out at his place and watched football all afternoon.",
+      "viGloss": "đi chơi, tụ tập",
+      "shadowSentence": "We usually hang out at the coffee shop near my old apartment."
+    },
+    {
+      "id": "catch-up-with",
+      "word": "catch up with",
+      "pos": "verb",
+      "tags": ["daily"],
+      "collocations": ["catch up with an old friend", "catch up over coffee", "catch up properly"],
+      "example": "It would be nice to catch up with you properly, not just over chat.",
+      "viGloss": "gặp lại, hàn huyên",
+      "shadowSentence": "I would love to catch up with you over coffee this weekend."
+    },
+    {
+      "id": "be-up-for",
+      "word": "be up for",
+      "pos": "phrase",
+      "tags": ["daily"],
+      "collocations": ["up for a coffee", "up for it", "up for something quick"],
+      "example": "Are you up for a walk after dinner, or are you too tired?",
+      "viGloss": "có hứng làm gì đó",
+      "shadowSentence": "Let me know if you would be up for a walk this evening."
+    },
+    {
+      "id": "no-worries",
+      "word": "no worries",
+      "pos": "phrase",
+      "tags": ["daily"],
+      "collocations": ["no worries at all", "no worries about that", "no worries, take your time"],
+      "example": "No worries, it happens. Just send it whenever you get a minute.",
+      "viGloss": "không sao đâu",
+      "shadowSentence": "No worries at all, you can send it over whenever you like."
+    },
+    {
+      "id": "swing-by",
+      "word": "swing by",
+      "pos": "verb",
+      "tags": ["daily"],
+      "collocations": ["swing by the office", "swing by later", "swing by on the way home"],
+      "example": "I will swing by the pharmacy on my way home and get the medicine.",
+      "viGloss": "ghé qua",
+      "shadowSentence": "I will swing by your place later and drop off the spare keys."
+    },
+    {
+      "id": "make-it",
+      "word": "make it",
+      "pos": "verb",
+      "tags": ["daily"],
+      "collocations": ["make it to the party", "not able to make it", "make it on time"],
+      "example": "Sorry, I cannot make it tonight. Something came up with my family.",
+      "viGloss": "đến được, tham gia được",
+      "shadowSentence": "I am not sure I can make it to dinner on Friday evening."
+    },
+    {
+      "id": "run-out-of",
+      "word": "run out of",
+      "pos": "verb",
+      "tags": ["daily"],
+      "collocations": ["run out of time", "run out of milk", "run out of patience"],
+      "example": "We ran out of coffee this morning, so I am not fully awake yet.",
+      "viGloss": "hết, cạn nguồn",
+      "shadowSentence": "We always run out of time before we run out of ideas."
+    },
+    {
+      "id": "put-off",
+      "word": "put off",
+      "pos": "verb",
+      "tags": ["daily"],
+      "collocations": ["put off a trip", "put it off again", "put off going to the dentist"],
+      "example": "I keep putting off the dentist, and now the tooth really hurts.",
+      "viGloss": "hoãn lại",
+      "shadowSentence": "I keep trying to put off the dentist, and it always gets worse."
+    },
+    {
+      "id": "get-around-to",
+      "word": "get around to",
+      "pos": "verb",
+      "tags": ["daily"],
+      "collocations": ["get around to it", "never get around to cleaning", "finally get around to it"],
+      "example": "I finally got around to fixing the shower after two months of ignoring it.",
+      "viGloss": "rốt cuộc cũng làm được việc gì",
+      "shadowSentence": "I never seem to get around to cleaning the kitchen on weekends."
+    },
+    {
+      "id": "sort-out",
+      "word": "sort out",
+      "pos": "verb",
+      "tags": ["daily"],
+      "collocations": ["sort out a problem", "sort it out quickly", "sort out the paperwork"],
+      "example": "I need to sort out my visa paperwork before I book any flights.",
+      "viGloss": "giải quyết, xử lý cho ổn",
+      "shadowSentence": "I have to sort out the paperwork before I book a flight."
+    },
+    {
+      "id": "act-up",
+      "word": "act up",
+      "pos": "verb",
+      "tags": ["daily"],
+      "collocations": ["the laptop is acting up", "my knee acts up", "acting up again"],
+      "example": "My laptop is acting up again. The screen keeps going black for no reason.",
+      "viGloss": "trở chứng, dở chứng, chạy lỗi",
+      "shadowSentence": "My old laptop is acting up again and the screen keeps going black."
+    },
+    {
+      "id": "to-be-honest",
+      "word": "to be honest",
+      "pos": "phrase",
+      "tags": ["daily"],
+      "collocations": ["to be honest with you", "to be perfectly honest", "to be honest about it"],
+      "example": "To be honest, I do not really enjoy big parties. I prefer small groups.",
+      "viGloss": "nói thật thì",
+      "shadowSentence": "To be honest, I would rather stay home and read a book."
+    },
+    {
+      "id": "fair-enough",
+      "word": "fair enough",
+      "pos": "phrase",
+      "tags": ["daily"],
+      "collocations": ["fair enough, then", "that is fair enough", "fair enough, I understand"],
+      "example": "Fair enough, I see why you would rather leave early. Let's do that.",
+      "viGloss": "cũng hợp lý, chấp nhận được",
+      "shadowSentence": "Fair enough, I can see why you would rather leave a bit early."
+    },
+    {
+      "id": "see-where-you-are-coming-from",
+      "word": "see where you are coming from",
+      "pos": "phrase",
+      "tags": ["daily"],
+      "collocations": ["I can see where you are coming from", "totally see where you are coming from", "see where they are coming from"],
+      "example": "I see where you are coming from, but the client really needs it this week.",
+      "viGloss": "hiểu quan điểm của bạn",
+      "shadowSentence": "I can see where you are coming from, but I still disagree."
+    },
+    {
+      "id": "not-really-my-thing",
+      "word": "not really my thing",
+      "pos": "phrase",
+      "tags": ["daily"],
+      "collocations": ["running is not really my thing", "more my thing", "not my thing at all"],
+      "example": "Loud clubs are not really my thing. I would rather sit and talk.",
+      "viGloss": "không hợp gu tôi lắm",
+      "shadowSentence": "Loud places are not really my thing, so let us find somewhere quiet."
+    },
+    {
+      "id": "order-it-to-go",
+      "word": "order it to go",
+      "pos": "phrase",
+      "tags": ["daily"],
+      "collocations": ["for here or to go", "order the noodles to go", "get it to go"],
+      "example": "I will order it to go. I am eating at my desk again today.",
+      "viGloss": "gọi món mang về",
+      "shadowSentence": "I will order it to go and eat at my desk again."
+    },
+    {
+      "id": "under-the-weather",
+      "word": "under the weather",
+      "pos": "phrase",
+      "tags": ["daily"],
+      "collocations": ["feel under the weather", "a bit under the weather", "still under the weather"],
+      "example": "I am a bit under the weather today, so I will work from home.",
+      "viGloss": "hơi mệt, không khoẻ trong người",
+      "shadowSentence": "I am feeling a bit under the weather and will rest today."
+    },
+    {
+      "id": "jet-lagged",
+      "word": "jet-lagged",
+      "pos": "adjective",
+      "tags": ["daily"],
+      "collocations": ["still jet-lagged", "badly jet-lagged", "jet-lagged from the flight"],
+      "example": "I am still jet-lagged from the flight, so I woke up at four.",
+      "viGloss": "mệt vì lệch múi giờ",
+      "shadowSentence": "I am still jet-lagged and I keep waking up before sunrise."
+    },
+    {
+      "id": "book-an-appointment",
+      "word": "book an appointment",
+      "pos": "phrase",
+      "tags": ["daily"],
+      "collocations": ["book an appointment with the doctor", "book an appointment online", "move an appointment"],
+      "example": "I need to book an appointment with the dentist before the pain gets worse.",
+      "viGloss": "đặt lịch hẹn",
+      "shadowSentence": "I need to book an appointment with the doctor for early next week."
+    },
+    {
+      "id": "the-other-day",
+      "word": "the other day",
+      "pos": "phrase",
+      "tags": ["daily"],
+      "collocations": ["saw him the other day", "the other day at lunch", "just the other day"],
+      "example": "I ran into an old classmate the other day at the coffee shop.",
+      "viGloss": "hôm nọ, mấy hôm trước",
+      "shadowSentence": "I met an old classmate the other day near the coffee shop."
+    },
+    {
+      "id": "wrap-up",
+      "word": "wrap up",
+      "pos": "verb",
+      "tags": ["pronunciation", "work"],
+      "collocations": ["wrap up the meeting", "wrap up for the day", "wrap up a project"],
+      "example": "Let's wrap up here. We can finish the rest tomorrow morning.",
+      "viGloss": "kết thúc, gói lại",
+      "shadowSentence": "Before we wrap up, I fixed the bug, pushed the branch, and asked for help."
+    },
+    {
+      "id": "home-cooked-meal",
+      "word": "home-cooked meal",
+      "pos": "noun",
+      "tags": ["pronunciation", "daily"],
+      "collocations": ["a proper home-cooked meal", "miss home-cooked meals", "cook a real meal"],
+      "example": "Nothing beats a home-cooked meal after a long week of eating takeout.",
+      "viGloss": "bữa cơm nhà",
+      "shadowSentence": "I still feel that a real home-cooked meal will fill me up well."
+    },
+    {
+      "id": "next-steps",
+      "word": "next steps",
+      "pos": "noun",
+      "tags": ["pronunciation"],
+      "collocations": ["agree on next steps", "list the next steps", "the next steps are clear"],
+      "example": "Before we close, can someone write down the next steps for the team?",
+      "viGloss": "các bước tiếp theo",
+      "shadowSentence": "Let us list the next steps, the next tasks, and the next tests."
+    },
+    {
+      "id": "think-through",
+      "word": "think through",
+      "pos": "verb",
+      "tags": ["pronunciation"],
+      "collocations": ["think it through", "think through the options", "think through a problem"],
+      "example": "Give me tonight to think it through, and I will answer in the morning.",
+      "viGloss": "suy nghĩ thấu đáo",
+      "shadowSentence": "Let me think through the whole thing with the three of them together."
+    },
+    {
+      "id": "worth-the-wait",
+      "word": "worth the wait",
+      "pos": "phrase",
+      "tags": ["pronunciation"],
+      "collocations": ["well worth the wait", "worth the wait in the end", "not worth the wait"],
+      "example": "The food took an hour, but honestly it was worth the wait.",
+      "viGloss": "đáng để chờ",
+      "shadowSentence": "This month of work was worth the wait and worth the whole effort."
+    },
+    {
+      "id": "vice-versa",
+      "word": "vice versa",
+      "pos": "adverb",
+      "tags": ["pronunciation"],
+      "collocations": ["and vice versa", "or vice versa", "vice versa as well"],
+      "example": "He covers my shift when I travel, and vice versa when he does.",
+      "viGloss": "ngược lại cũng vậy",
+      "shadowSentence": "We can review first and vote after, or vice versa, if everyone is available."
+    },
+    {
+      "id": "make-sure",
+      "word": "make sure",
+      "pos": "verb",
+      "tags": ["pronunciation"],
+      "collocations": ["just to make sure", "make sure it works", "make sure of the date"],
+      "example": "Make sure you save the file before you close the laptop again.",
+      "viGloss": "bảo đảm chắc chắn rằng",
+      "shadowSentence": "Make sure she shares the short list, and make sure it seems sensible."
+    },
+    {
+      "id": "a-couple-of-things",
+      "word": "a couple of things",
+      "pos": "phrase",
+      "tags": ["pronunciation"],
+      "collocations": ["a couple of things to check", "just a couple of things", "a couple of small things"],
+      "example": "A couple of things came up this morning, so I started a bit late.",
+      "viGloss": "vài điều, vài việc",
+      "shadowSentence": "I have a couple of things to check, plus the tests and the tasks."
+    },
+    {
+      "id": "used-to",
+      "word": "used to",
+      "pos": "verb",
+      "tags": ["pronunciation"],
+      "collocations": ["used to work there", "used to be easier", "get used to it"],
+      "example": "I used to bike to work, but now the traffic makes it impossible.",
+      "viGloss": "từng, hồi trước hay",
+      "shadowSentence": "I used to walk to work, and I used to like the cold mornings."
+    },
+    {
+      "id": "thanks-a-lot",
+      "word": "thanks a lot",
+      "pos": "phrase",
+      "tags": ["pronunciation"],
+      "collocations": ["thanks a lot for that", "thanks a lot for your help", "thanks a lot, really"],
+      "example": "Thanks a lot for covering for me yesterday. I owe you one.",
+      "viGloss": "cảm ơn nhiều",
+      "shadowSentence": "Thanks a lot, I think both of these are worth another look."
+    }
+  ]
+}

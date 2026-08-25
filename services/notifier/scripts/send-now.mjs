@@ -8,7 +8,7 @@
  * Usage:  node services/notifier/scripts/send-now.mjs
  */
 
-import { buildMessage } from '../src/lesson.mjs';
+import { buildLesson } from '../src/lesson.mjs';
 import { sendMessage } from '../src/telegram.mjs';
 import { loadEnv } from './load-env.mjs';
 
@@ -25,5 +25,6 @@ if (!token || !chatId) {
   process.exit(1);
 }
 
-const message = await sendMessage(token, chatId, buildMessage());
+const lesson = await buildLesson();
+const message = await sendMessage(token, chatId, lesson.text);
 console.log(`Sent. message_id=${message.message_id} chat_id=${chatId}`);

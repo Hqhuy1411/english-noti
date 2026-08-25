@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Study service -- the data plane behind the lessons.
+
+  Owns the DynamoDB table holding spaced-repetition state, the lesson actually
+  sent on a given day, and each submission. Deliberately owns no Lambda: with one
+  consumer, a lesson-building function would add a second failure point on the
+  send path for no gain (ADR 0009). The notifier reads this table in-process
+  through its lesson.mjs seam, and the coach service will read the same table.
+
+  Deployed once, not once per environment: prod and test share the table and are
+  separated inside it by key (ADR 0010), so a smoke test cannot corrupt real
+  spaced-repetition state.
+
+Parameters:
+  TableName:
+    Type: String
+    Default: english-reminder-study
+    Description: >
+      DynamoDB table name. A parameter so a throwaway table can be pointed at
+      during a test without editing this file.
+
+Resources:
+  # Single-table design; the key patterns are fixed by ADR 0010 and repeated in
+  # .claude/rules/study-data.md, which loads when services/study/** is opened.
+  #
+  # Retain on delete: this table accumulates months of spaced-repetition history
+  # that cannot be reconstructed from anything else in the repo -- the curriculum
+  # is committed, but which words you have actually spoken is not. An orphaned
+  # on-demand table costs effectively nothing; losing the history to a `sam
+  # delete` is irreversible. Teardown therefore needs an explicit extra step,
+  # documented in docs/RUNBOOK.md, the same shape as the out-of-band SSM
+  # parameter in ADR 0004.
+  StudyTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Ref TableName
+      # On-demand: ~30 reads and a handful of writes a day sits far below the
+      # cheapest provisioned setting, and needs no capacity planning.
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        # "Which words are due on or before today?" -- the only access pattern
+        # the primary key cannot serve, because dueOn is not part of it.
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      TimeToLiveSpecification:
+        # Used by the coach service's update_id de-duplication records, which are
+        # only meaningful for as long as Telegram will retry an update.
+        AttributeName: expiresAt
+        Enabled: true
+
+Outputs:
+  TableName:
+    Description: DynamoDB table holding SRS state, sent lessons and submissions.
+    Value: !Ref StudyTable
+
+  TableArn:
+    Description: Table ARN, for scoping IAM policies in consuming services.
+    Value: !GetAtt StudyTable.Arn

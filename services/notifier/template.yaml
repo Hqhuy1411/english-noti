@@ -34,6 +34,12 @@ Parameters:
     Default: 30
     Description: CloudWatch Logs retention, in days.
 
+  StudyTableName:
+    Type: String
+    Description: >
+      DynamoDB table owned by the study service, read through lesson.mjs to pick
+      the day's words and to record the lesson that was actually sent.
+
   TokenParameterName:
     Type: String
     Default: /english-reminder/telegram-bot-token
@@ -69,10 +75,15 @@ Resources:
           TELEGRAM_CHAT_ID: !Ref TelegramChatId
           SSM_TOKEN_PARAM: !Ref TokenParameterName
           ENVIRONMENT: !Ref EnvironmentName
+          STUDY_TABLE: !Ref StudyTableName
       Policies:
         # Least-privilege: read access scoped to this app's parameter path only.
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName: /english-reminder/*
+        # Scoped to this one table, not a broad managed policy. Crud rather than
+        # read-only because a send writes LESSON#<date> back (ADR 0010).
+        - DynamoDBCrudPolicy:
+            TableName: !Ref StudyTableName
       Events:
         Reminder:
           # ScheduleV2 = EventBridge Scheduler. The older `Schedule` type maps to

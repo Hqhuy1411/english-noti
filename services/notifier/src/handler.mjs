@@ -11,7 +11,7 @@
  */
 
 import { getBotToken, getChatId } from './config.mjs';
-import { buildMessage } from './lesson.mjs';
+import { buildLesson } from './lesson.mjs';
 import { sendMessage, TelegramError } from './telegram.mjs';
 import * as log from './logger.mjs';
 
@@ -26,7 +26,8 @@ export const handler = async (event, context) => {
 
   try {
     const [token, chatId] = [await getBotToken(), getChatId()];
-    const message = await sendMessage(token, chatId, buildMessage());
+    const lesson = await buildLesson();
+    const message = await sendMessage(token, chatId, lesson.text);
 
     log.info('send.success', {
       requestId,

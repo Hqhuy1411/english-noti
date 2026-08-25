@@ -42,6 +42,13 @@ Parameters:
     Description: CloudWatch Logs retention, in days.
 
 Resources:
+  # Deployed before the notifiers, implicitly: they reference its TableName
+  # output, which is what orders the nested stacks.
+  Study:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: services/study/template.yaml
+
   NotifierProd:
     Type: AWS::Serverless::Application
     Properties:
@@ -49,6 +56,7 @@ Resources:
       Parameters:
         EnvironmentName: prod
         TelegramChatId: !Ref TelegramChatId
+        StudyTableName: !GetAtt Study.Outputs.TableName
         ScheduleExpression: !Ref ProdScheduleExpression
         ScheduleState: ENABLED
         LogRetentionDays: !Ref LogRetentionDays
@@ -60,11 +68,16 @@ Resources:
       Parameters:
         EnvironmentName: test
         TelegramChatId: !Ref TelegramChatId
+        StudyTableName: !GetAtt Study.Outputs.TableName
         ScheduleExpression: !Ref TestScheduleExpression
         ScheduleState: !Ref TestScheduleState
         LogRetentionDays: !Ref LogRetentionDays
 
 Outputs:
+  StudyTableName:
+    Description: DynamoDB table holding lesson state -- shared by every environment.
+    Value: !GetAtt Study.Outputs.TableName
+
   ProdFunctionName:
     Description: Production function -- invoke to test the real path on demand.
     Value: !GetAtt NotifierProd.Outputs.FunctionName

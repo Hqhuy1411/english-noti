@@ -9,7 +9,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildMessage } from '../src/lesson.mjs';
+import { buildLesson } from '../src/lesson.mjs';
 import { sendMessage, TelegramError } from '../src/telegram.mjs';
 
 const TOKEN = 'SECRET-TOKEN-DO-NOT-LEAK';
@@ -58,23 +58,23 @@ const rejectFetch = async () => ({
 
 // --- lesson.mjs -------------------------------------------------------------
 
-test('message renders the timestamp in Asia/Ho_Chi_Minh', () => {
+test('message renders the timestamp in Asia/Ho_Chi_Minh', async () => {
   // 14:00 UTC is 21:00 in Vietnam (UTC+7), the scheduled send time.
-  const text = buildMessage(new Date('2026-08-22T14:00:00Z'));
+  const { text } = await buildLesson({ now: new Date('2026-08-22T14:00:00Z'), table: null });
   assert.match(text, /21:00/);
   assert.match(text, /Asia\/Ho_Chi_Minh/);
 });
 
-test('message escapes HTML so parse_mode cannot be broken by content', () => {
-  const text = buildMessage(new Date('2026-08-22T14:00:00Z'));
+test('message escapes HTML so parse_mode cannot be broken by content', async () => {
+  const { text } = await buildLesson({ now: new Date('2026-08-22T14:00:00Z'), table: null });
   // Our own <b> markup survives; nothing else introduces a raw stray bracket.
   assert.ok(text.includes('<b>'));
 });
 
-test('a non-prod environment is labelled so a test is never mistaken for real', () => {
+test('a non-prod environment is labelled so a test is never mistaken for real', async () => {
   const when = new Date('2026-08-23T02:00:00Z'); // 09:00 in Vietnam
-  const prod = buildMessage(when, 'prod');
-  const test_ = buildMessage(when, 'test');
+  const { text: prod } = await buildLesson({ now: when, environment: 'prod', table: null });
+  const { text: test_ } = await buildLesson({ now: when, environment: 'test', table: null });
 
   assert.ok(!prod.includes('TEST'), 'prod message must not be labelled');
   assert.match(test_, /\[TEST\]/);
