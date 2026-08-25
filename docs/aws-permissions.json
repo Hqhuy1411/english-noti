@@ -95,6 +95,23 @@
         "scheduler:GetScheduleGroup"
       ],
       "Resource": "*"
+    },
+    {
+      "Sid": "StudyTable",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:CreateTable",
+        "dynamodb:DeleteTable",
+        "dynamodb:DescribeTable",
+        "dynamodb:DescribeTimeToLive",
+        "dynamodb:UpdateTable",
+        "dynamodb:UpdateTimeToLive",
+        "dynamodb:DescribeContinuousBackups",
+        "dynamodb:TagResource",
+        "dynamodb:UntagResource",
+        "dynamodb:ListTagsOfResource"
+      ],
+      "Resource": "arn:aws:dynamodb:ap-southeast-1:ACCOUNT_ID:table/english-reminder-study"
     }
   ]
 }

@@ -292,7 +292,7 @@ Ký hiệu owner: **`main`** = session chính · **`ck`** = subagent `convention
 | 1.11 | `handler.mjs` — **đúng một dòng** (`await buildLesson()`), không đụng gì khác | `main` | `git diff --stat services/notifier/src/handler.mjs` = 1 dòng đổi |
 | 1.12 | Cập nhật 3 call site của `buildMessage`: `handler.mjs`, `scripts/send-now.mjs`, `test/notifier.test.mjs` | `main` | `node --test` xanh, **gồm cả token-leak assertions** (đỏ ở đó là security regression, không phải flaky) |
 | 1.13 | Test mới: SRS chọn đúng; `[TEST]` sống sót; **fallback khi DynamoDB ném lỗi vẫn ra message** | `main` | `node --test` xanh |
-| 1.14 | `scripts/seed-curriculum.mjs` — nạp curriculum vào bảng. Đặt ở **repo root**, không dưới `services/*/scripts/` (rule: script trong đó không được cần AWS credentials) | `main` | Chạy được, idempotent |
+| 1.14 | ~~`scripts/seed-curriculum.mjs`~~ — **removed, not needed.** See ADR 0010's Consequences: the table only holds per-word SRS state, created lazily on first selection; the curriculum ships inside the Lambda artifact and is read from disk. Nothing to seed. | — | — |
 | 1.15 | `docs/aws-permissions.json` — thêm block DynamoDB (gồm cả `DescribeTable` để CloudFormation đọc lại) | `main` | Deploy không rollback vì permission |
 | 1.16 | **Deploy + verify thật** | `main` + `skill deploy` | `/deploy in 8m` → `[TEST]` message có **từ vựng thật** tới máy; hôm sau kiểm tra nội dung **khác** ngày trước. Rollback ⇒ dùng `skill cfn-deploy-triage` (đọc event của **nested** stack). Không tới ⇒ `skill telegram-bot-ops` |
 | 1.17 | `node scripts/record-run-history.mjs` sau mỗi lần fire | `main` | Row mới trong `docs/RUN-HISTORY.md` |

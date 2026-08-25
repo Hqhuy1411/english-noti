@@ -16,11 +16,14 @@ inline keyboard — so this ADR both answers the three questions and revisits 00
 
 ### Q1 — where content comes from
 
-A **curated curriculum committed to the repo** at `services/study/data/curriculum.json`.
-It is read at send time, not generated per-message and not fetched from an
-external feed. Generation is not ruled out forever: backlog 0005 adds it later as
-an *enrichment* layered on top of the committed file, which stays the fallback
-even after an LLM is introduced.
+A **curated curriculum committed to the repo**, read at send time, not generated
+per-message and not fetched from an external feed. Generation is not ruled out
+forever: backlog 0005 adds it later as an *enrichment* layered on top of the
+committed file, which stays the fallback even after an LLM is introduced.
+
+(It ships at `services/notifier/src/study/curriculum.json`, not under
+`services/study/`, for the packaging reason in `.claude/rules/study-data.md` —
+`CodeUri: src/` means only `services/notifier/src/` is ever uploaded.)
 
 ### Q2 — does it need state
 
@@ -84,20 +87,35 @@ line, both verified against the code before being written down here:
      // -> { text, replyMarkup, lessonId }
    ```
 
-   `handler.mjs` changes by exactly one line: `buildMessage()` becomes
-   `await buildLesson(...)` (plus destructuring `text`/`replyMarkup`/`lessonId`
-   out of the result). Scheduling, delivery and logging remain untouched, which is
-   what ADR 0007 actually protects — the file list, not the sync/async keyword.
+   `handler.mjs`'s change is not one line — the exported function was renamed
+   from `buildMessage` to `buildLesson`, so the import statement changes too, and
+   the call site becomes two lines instead of one (verified with
+   `git show a976c46 -- services/notifier/src/handler.mjs`):
 
-2. **`telegram.mjs`'s `sendMessage` gains a fourth, optional parameter.** Today it
-   is `sendMessage(token, chatId, text)` — verified, three parameters, no
-   `replyMarkup`. It becomes `sendMessage(token, chatId, text, replyMarkup)`. When
-   `replyMarkup` is `undefined` (every call until backlog 0003 ships), the request
-   body sent to Telegram must be byte-identical to today's, so the nine existing
-   tests in `test/notifier.test.mjs` stay green without being rewritten. This is
-   the inline-keyboard need (`🎤 Nói` / `📝 Viết` / `📖 Thêm ví dụ` / `😴 Bỏ qua
-   hôm nay`) from backlog 0003, arriving one ADR early because the seam has to be
-   widened anyway.
+   ```diff
+   -import { buildMessage } from './lesson.mjs';
+   +import { buildLesson } from './lesson.mjs';
+   -    const message = await sendMessage(token, chatId, buildMessage());
+   +    const lesson = await buildLesson();
+   +    const message = await sendMessage(token, chatId, lesson.text);
+   ```
+
+   What ADR 0007 actually protects still holds: scheduling, delivery and logging
+   are untouched — it's the file list that stayed small, not the line count.
+
+2. **`telegram.mjs`'s `sendMessage` will gain a fourth, optional parameter, but
+   has not yet.** Today it is `sendMessage(token, chatId, text)` — verified,
+   three parameters, no `replyMarkup` — and `buildLesson` returns
+   `replyMarkup: null` unconditionally. The planned shape is
+   `sendMessage(token, chatId, text, replyMarkup)`, deferred to backlog 0003:
+   there is no keyboard to send until something can receive a button press. When
+   it lands, and `replyMarkup` is `undefined`/`null` (every call until then), the
+   request body sent to Telegram must be byte-identical to today's, so the nine
+   existing tests in `test/notifier.test.mjs` stay green without being rewritten.
+   This is for the inline-keyboard need (`🎤 Nói` / `📝 Viết` / `📖 Thêm ví dụ` /
+   `😴 Bỏ qua hôm nay`) from backlog 0003 — the seam's return shape is widened now
+   because it has to change anyway, but the parameter itself is not implemented
+   yet.
 
 Three call sites of `buildMessage` were found by grep, matching what the plan
 claimed: `services/notifier/src/handler.mjs`, `services/notifier/scripts/send-now.mjs`,
@@ -119,9 +137,11 @@ verification in task 1.16.
 
 ## Consequences
 
-- `services/study/template.yaml` owns `StudyTable` (DynamoDB, on-demand) and
-  `services/study/data/curriculum.json`; it does not own a Lambda function.
-- `lesson.mjs` grows a DynamoDB dependency (via `services/study/src/ddb.mjs`) and
+- `services/study/template.yaml` owns only `StudyTable` (DynamoDB, on-demand); it
+  does not own a Lambda function. `curriculum.json` ships with the notifier's own
+  code at `services/notifier/src/study/curriculum.json`, not under
+  `services/study/` — see `.claude/rules/study-data.md`.
+- `lesson.mjs` grows a DynamoDB dependency (via `services/notifier/src/study/ddb.mjs`) and
   becomes the one place in the notifier that talks to another AWS resource beyond
   SSM and Telegram — still inside the seam ADR 0007 defined, now async.
 - `handler.mjs`, `telegram.mjs` and `test/notifier.test.mjs` all change, which

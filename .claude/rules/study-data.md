@@ -1,6 +1,7 @@
 ---
 paths:
   - "services/study/**"
+  - "services/notifier/src/study/**"
 ---
 
 # Study data conventions
@@ -8,6 +9,29 @@ paths:
 Loaded when editing the study service. Reasoning and rejected alternatives live in
 `docs/decisions/0009` (content source, state, seam) and `docs/decisions/0010`
 (key schema). This file is the operational summary, not a restatement of either.
+
+## Where the code actually is
+
+`services/study/` owns only `template.yaml` (the table). The marshalling, the
+selection logic and the curriculum data live at
+`services/notifier/src/study/` — `ddb.mjs`, `srs.mjs`, `curriculum.json` — next
+to the notifier code that is their only consumer, not inside `services/study/`.
+
+This is because `services/notifier/template.yaml` sets `CodeUri: src/`, so
+`sam build` packages `services/notifier/src/` only; anything under
+`services/study/src/` would never be uploaded and the import would fail at
+runtime. Verified: `sam build`, then `.aws-sam/build/NotifierProd/NotifierFunction/`
+contains the notifier's own files plus a `study/` subdirectory with all three
+files.
+
+Don't "fix" this by moving the code back into `services/study/` to match the
+directory name — that breaks the build. It also isn't shared via a Lambda layer
+yet, for the same reason ADR 0009 rejected a lesson-building Lambda: there is
+only one consumer today, so there is nothing to share. When the coach service
+(backlog 0003) needs `srs.mjs`, that is the moment to choose between a layer and
+duplication — a layer needs a `package.json` for Node to resolve a bare
+specifier, which collides with ADR 0001 (zero npm dependencies) and has to be
+faced then, with real information, not assumed away now.
 
 ## Key patterns
 
@@ -39,14 +63,14 @@ condition, never a `Scan`.
 
 Not confirmed present in the `nodejs22.x` runtime bundle (only `@aws-sdk/client-ssm`
 is confirmed there, per `services/notifier/src/config.mjs`). Marshalling is
-hand-written in `services/study/src/ddb.mjs` — S/N/BOOL/L/M only, no
+hand-written in `services/notifier/src/study/ddb.mjs` — S/N/BOOL/L/M only, no
 `lib-dynamodb` convenience wrapper. Don't add it back as a dependency without
 reopening ADR 0001 first.
 
 ## `srs.mjs` is pure
 
 Selection logic (which items are due, which new words to introduce, box
-transitions) lives in `services/study/src/srs.mjs` as **pure functions — no I/O**.
+transitions) lives in `services/notifier/src/study/srs.mjs` as **pure functions — no I/O**.
 It takes data in, returns a decision, does not call DynamoDB itself. This is what
 lets it run under `node --test` with no AWS credentials; the daily-load and
 gap-handling rules below are exactly the kind of logic that needs to be testable

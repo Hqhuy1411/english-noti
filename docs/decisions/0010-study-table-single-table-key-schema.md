@@ -73,13 +73,19 @@ real submission.
 
 ## Consequences
 
-- `services/study/src/ddb.mjs` (ADR 0009 / rule `.claude/rules/study-data.md`)
-  hand-writes marshalling for this schema; there is no `lib-dynamodb` guarantee in
-  the Lambda runtime to lean on.
-- `services/study/src/srs.mjs` selects due items via the `GSI1PK`/`GSI1SK` query,
+- `services/notifier/src/study/ddb.mjs` (ADR 0009 / rule
+  `.claude/rules/study-data.md`) hand-writes marshalling for this schema; there is
+  no `lib-dynamodb` guarantee in the Lambda runtime to lean on.
+- `services/notifier/src/study/srs.mjs` selects due items via the `GSI1PK`/`GSI1SK` query,
   capped and ordered per the daily-load rule in `.claude/rules/study-data.md`; it
   never reads or writes `box` itself unless it is processing a confirmed spoken
   submission.
+- **The table needs no seeding.** `curriculum.json` ships inside the Lambda
+  artifact and is read from disk at cold start; the table holds only per-word SRS
+  state (`box`, `dueOn`, `timesSpoken`, `timesFailed`), and an `ITEM#<wordId>`
+  record is created lazily the first time that word is selected into a lesson,
+  not pre-populated from the curriculum. There is nothing for a seed script to
+  load.
 - `chatId` is not a secret — `CLAUDE.md` already establishes that `TELEGRAM_CHAT_ID`
   is an ordinary env var — but it is personal, and appears throughout every PK in
   this table. It must not appear in a log line that does not need it (e.g. a

@@ -94,6 +94,7 @@ Why each block is needed:
 | `s3:PutObject` / `GetObject` | SAM uploads the code zip **and the nested stack template** there on every deploy. |
 | `ssm:PutParameter` etc. | Storing and rotating the bot token. |
 | `ssm:DescribeParameters` | Listing is an account-level action and cannot be scoped to a path, hence `Resource: "*"`. |
+| `dynamodb:*` on `table/english-reminder-study` | Creating and updating the study table. `DescribeTable`, `DescribeTimeToLive` and `DescribeContinuousBackups` are **read-backs**, not extras: CloudFormation reads a resource after creating it, so without them the create succeeds and the stack still fails -- the same trap `scheduler:GetSchedule` caused, described in `docs/DEPLOY-LOG.md`. |
 
 CloudFormation, Lambda, Logs, IAM role creation and EventBridge Scheduler
 permissions are assumed already present.
@@ -406,3 +407,18 @@ aws cloudformation delete-stack --stack-name aws-sam-cli-managed-default \
 
 Deleting the stack also deletes the log groups, because they are declared as
 stack resources rather than auto-created by Lambda.
+
+**`sam delete` does not remove the study table.** `services/study/template.yaml`
+sets `DeletionPolicy: Retain` on it deliberately: it holds which words you have
+actually spoken and when they are next due, and nothing in the repo can rebuild
+that -- the curriculum is committed, the history is not. An orphaned on-demand
+table costs effectively nothing, so the trade is a stray resource against
+irreversible data loss. To finish a teardown, delete it on purpose:
+
+```sh
+aws dynamodb delete-table --table-name english-reminder-study \
+  --region ap-southeast-1
+```
+
+If you only want to start the schedule over, do **not** delete it -- redeploying
+reuses the existing table and your spaced-repetition history survives.
