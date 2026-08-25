@@ -4,7 +4,7 @@
 is open, and where the detail lives. If it disagrees with reality, fixing it is
 part of the next commit.
 
-Last reviewed: 2026-08-24.
+Last reviewed: 2026-08-25.
 
 ## Phase
 
@@ -42,12 +42,18 @@ Full account-specific detail: `docs/DEPLOY-LOG.md`. Run `/status` for a live che
 |---|---|---|
 | [0001](backlog/0001-real-lesson-content.md) | Real lesson content behind the `lesson.mjs` seam | open — the Phase 2 headline |
 | [0002](backlog/0002-rotate-bot-token.md) | Rotate the bot token exposed in a setup transcript | open — **urgency raised**: the repo is now public and names the bot |
+| [0003](backlog/0003-inbound-reply-channel.md) | Inbound reply channel: Telegram webhook, secret-token + allowlist auth, `update_id` de-dup | open — Phase 2.2, needs 0001 first |
+| [0004](backlog/0004-speaking-practice-no-llm.md) | Speaking practice, no LLM: S3 audio, Transcribe, EventBridge job-state-change, local metrics | open — Phase 2.3, needs 0003 |
+| [0005](backlog/0005-llm-coaching.md) | LLM coaching: provider/model ADR, `llm.mjs` seam, prompt caching, delivery-never-depends-on-LLM | open — Phase 2.4, needs 0004 |
+| [0006](backlog/0006-weekly-digest-and-tuning.md) | Weekly digest and content-split tuning | open — Phase 2.5, needs 0001/0004/0005 |
 
 Known Phase 2 ideas **not yet ticketed**, so nobody plans against them as if they
-were decided: a separate `services/lesson/` nested stack, interactive
-"done / snooze" buttons (needs API Gateway plus a Telegram webhook), and a
-CloudWatch alarm on the function's `Errors` metric wired to SNS. They are listed in
-`README.md` under "Phase 2". Ticket one when it becomes real.
+were decided: a separate `services/lesson/` nested stack, and a CloudWatch alarm
+on the function's `Errors` metric wired to SNS. They are listed in `README.md`
+under "Phase 2". Ticket one when it becomes real.
+
+(The interactive "done / snooze" buttons idea previously listed here is now
+covered by ticket 0003's inline keyboard and webhook.)
 
 ## Latest decision
 

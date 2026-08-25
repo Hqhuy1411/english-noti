@@ -69,6 +69,7 @@ These hold everywhere, so they are here rather than in a rule that might not loa
 |---|---|
 | `commands/deploy.md` | `/deploy` — validates, builds, resolves a future-dated one-shot for the test schedule, deploys, then reports the schedules as they actually ended up. |
 | `commands/status.md` | `/status` — read-only health check: next fire times, last run and its outcome, and whether a run was scheduled or hand-triggered. Never invokes a function. |
+| `plans/` | Implementation plans for this project, e.g. `plans/phase-2-study-service.md`. Live here, not in machine-local `~/.claude/plans/`, for the same reason as the rest of "Where new knowledge goes": that directory doesn't sync, subagents can't read it, and a teammate never sees it. |
 | `rules/` | Path-scoped conventions: `infra-templates.md` (templates), `lambda-src.md` (runtime code), `tests-and-scripts.md` (tests, local scripts). They enter context when you open a matching file. |
 | `skills/cfn-deploy-triage/` | Rolled-back deploy: read the *nested* stack's events, and avoid the two permission traps that cost five deploys here. |
 | `skills/telegram-bot-ops/` | Bot API behaviour that makes a working bot look broken. |

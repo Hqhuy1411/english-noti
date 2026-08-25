@@ -42,8 +42,9 @@ sam deploy --no-confirm-changeset --parameter-overrides \
 ```
 
 **Pass `TestScheduleState=ENABLED` every time, even though `ENABLED` is the
-template default.** The test environment was parked on 2026-08-24 (ADR 0008,
-`docs/STATUS.md`), so the *stack's* stored value is `DISABLED`. A parameter you
+template default.** The test environment was parked on 2026-08-24
+(`docs/STATUS.md` — this was an operational action, not an ADR; there is no
+decision record for it), so the *stack's* stored value is `DISABLED`. A parameter you
 omit is not reset to its default — CloudFormation reuses the previous value. Omit
 it and the deploy succeeds, reports a perfectly good `at(...)` expression, and the
 smoke test silently never fires: the same failure mode as a past `at(...)`, from a
