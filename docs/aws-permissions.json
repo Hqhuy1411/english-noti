@@ -102,16 +102,26 @@
       "Action": [
         "dynamodb:CreateTable",
         "dynamodb:DeleteTable",
+        "dynamodb:UpdateTable",
         "dynamodb:DescribeTable",
         "dynamodb:DescribeTimeToLive",
-        "dynamodb:UpdateTable",
         "dynamodb:UpdateTimeToLive",
         "dynamodb:DescribeContinuousBackups",
+        "dynamodb:UpdateContinuousBackups",
+        "dynamodb:DescribeContributorInsights",
+        "dynamodb:UpdateContributorInsights",
+        "dynamodb:DescribeKinesisStreamingDestination",
         "dynamodb:TagResource",
         "dynamodb:UntagResource",
         "dynamodb:ListTagsOfResource"
       ],
       "Resource": "arn:aws:dynamodb:ap-southeast-1:ACCOUNT_ID:table/english-reminder-study"
+    },
+    {
+      "Sid": "StudyTableList",
+      "Effect": "Allow",
+      "Action": "dynamodb:ListTables",
+      "Resource": "*"
     }
   ]
 }

@@ -104,3 +104,25 @@ test('the seam returns the shape ADR 0009 specifies', async () => {
   assert.deepEqual(Object.keys(lesson).sort(), ['lessonId', 'replyMarkup', 'text']);
   assert.equal(lesson.replyMarkup, null, 'no keyboard until the coach service exists');
 });
+
+test('a technical concept is set as something to explain, not a sentence to read', async () => {
+  const tech = curriculum.filter((i) => i.tags.includes('tech'));
+  assert.ok(tech.length > 0, 'no tech items in the curriculum');
+
+  // Drive the selector straight at a tech item rather than waiting for the
+  // rotation to land on one.
+  const { text } = await buildLesson({
+    now: new Date('2026-08-26T14:00:00Z'),
+    table: null,
+    curriculum: tech,
+  });
+
+  assert.match(text, /Giải thích/);
+  assert.doesNotMatch(text, /Đọc to câu này/);
+});
+
+test('technical shadow sentences spell acronyms out, so they can be said aloud', async () => {
+  for (const item of curriculum.filter((i) => i.tags.includes('tech'))) {
+    assert.doesNotMatch(item.shadowSentence, /\b[A-Z]{2,}\b/, `${item.id}: unsayable acronym`);
+  }
+});

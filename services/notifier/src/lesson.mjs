@@ -25,11 +25,9 @@ import { selectLesson, newItem, isoDate } from './study/srs.mjs';
 
 const TZ = 'Asia/Ho_Chi_Minh';
 
-const curriculum = JSON.parse(
+const allItems = JSON.parse(
   readFileSync(new URL('./study/curriculum.json', import.meta.url), 'utf8'),
 ).items;
-
-const byId = new Map(curriculum.map((item) => [item.id, item]));
 
 const vnDateTime = (now) =>
   new Intl.DateTimeFormat('vi-VN', { timeZone: TZ, dateStyle: 'full', timeStyle: 'short' }).format(now);
@@ -60,6 +58,17 @@ function pickTask(today, mode, items) {
   const focus = items[dayIndex(today) % Math.max(1, items.length)];
 
   if (!focus) return { type: 'shadow', prompt: 'Đọc to câu bất kỳ ở trên.', expectedText: null };
+
+  // A technical concept is not vocabulary to be used in a sentence -- the
+  // learner already knows what MVCC is. What they cannot do is explain it out
+  // loud in English in a design review, so that is the exercise.
+  if (focus.tags.includes('tech')) {
+    return {
+      type: 'explain',
+      prompt: `Giải thích "${focus.word}" trong 60 giây bằng tiếng Anh, như đang nói với một đồng nghiệp mới vào team. Đừng đọc định nghĩa — nói như trong design review.`,
+      expectedText: null,
+    };
+  }
 
   if (type === 'shadow') {
     return {
@@ -156,7 +165,9 @@ export async function buildLesson({
   environment = process.env.ENVIRONMENT ?? 'prod',
   table = process.env.STUDY_TABLE,
   chatId = process.env.TELEGRAM_CHAT_ID,
+  curriculum = allItems,
 } = {}) {
+  const byId = new Map(curriculum.map((item) => [item.id, item]));
   const today = isoDate(now, TZ);
   const isProd = environment === 'prod';
   // ADR 0010: a test firing must never overwrite the record a real submission

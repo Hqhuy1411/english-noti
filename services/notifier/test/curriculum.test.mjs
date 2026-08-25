@@ -13,7 +13,8 @@ const curriculum = JSON.parse(
   await readFile(new URL('../src/study/curriculum.json', import.meta.url), 'utf8'),
 );
 
-const TAGS = new Set(['work', 'daily', 'pronunciation']);
+const TAGS = new Set(['work', 'daily', 'pronunciation', 'tech']);
+const DOMAINS = new Set(['database', 'distributed-systems', 'performance', 'search', 'data-structures']);
 const POS = new Set(['verb', 'noun', 'adjective', 'adverb', 'phrase']);
 
 test('the curriculum parses and is not empty', () => {
@@ -32,7 +33,18 @@ test('every item carries the fields the lesson builder reads', () => {
     assert.ok(item.tags.length > 0, `${where}: no tags`);
     for (const tag of item.tags) assert.ok(TAGS.has(tag), `${where}: unknown tag ${tag}`);
     assert.ok(item.collocations.length >= 2, `${where}: needs at least two collocations`);
+
+    // `domain` is optional -- only the tech items carry it -- but when it is
+    // there it drives grouping, so a typo must not pass silently.
+    if (item.tags.includes('tech')) {
+      assert.ok(DOMAINS.has(item.domain), `${where}: tech item has unknown domain ${item.domain}`);
+    }
   }
+});
+
+test('every technical domain the learner asked for is actually covered', () => {
+  const covered = new Set(curriculum.items.filter((i) => i.domain).map((i) => i.domain));
+  for (const domain of DOMAINS) assert.ok(covered.has(domain), `nothing covers ${domain}`);
 });
 
 test('ids are unique and usable as a DynamoDB sort key', () => {
