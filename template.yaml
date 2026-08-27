@@ -58,6 +58,17 @@ Resources:
     Properties:
       Location: services/study/template.yaml
 
+  # One bot means one webhook URL, so the coach is deployed once rather than
+  # once per environment. See services/coach/template.yaml.
+  Coach:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: services/coach/template.yaml
+      Parameters:
+        TelegramChatId: !Ref TelegramChatId
+        StudyTableName: !GetAtt Study.Outputs.TableName
+        LogRetentionDays: !Ref LogRetentionDays
+
   NotifierProd:
     Type: AWS::Serverless::Application
     Properties:
@@ -85,6 +96,14 @@ Resources:
         LogRetentionDays: !Ref LogRetentionDays
 
 Outputs:
+  WebhookUrl:
+    Description: Telegram webhook endpoint -- pass to scripts/set-webhook.mjs.
+    Value: !GetAtt Coach.Outputs.WebhookUrl
+
+  CoachLogGroup:
+    Description: CloudWatch log group for inbound updates.
+    Value: !GetAtt Coach.Outputs.LogGroupName
+
   StudyTableName:
     Description: DynamoDB table holding lesson state -- shared by every environment.
     Value: !GetAtt Study.Outputs.TableName

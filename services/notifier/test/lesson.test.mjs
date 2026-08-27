@@ -102,7 +102,25 @@ test('writing appears on a writing day and not on the days between', async () =>
 test('the seam returns the shape ADR 0009 specifies', async () => {
   const lesson = await buildLesson({ now: WED, table: null });
   assert.deepEqual(Object.keys(lesson).sort(), ['lessonId', 'replyMarkup', 'text']);
-  assert.equal(lesson.replyMarkup, null, 'no keyboard until the coach service exists');
+});
+
+test('the lesson carries buttons whose callback data the coach actually handles', async () => {
+  const { replyMarkup } = await buildLesson({ now: WED, table: null });
+  const actions = replyMarkup.inline_keyboard.flat().map((b) => b.callback_data);
+
+  // These strings are a wire contract with services/coach/src/handler.mjs.
+  // Renaming one here without renaming it there produces a button that answers
+  // "Chưa hiểu nút này" -- a bug that only shows up on a phone.
+  assert.deepEqual(actions.sort(), ['examples', 'skip', 'speak', 'write']);
+});
+
+test('the write button only appears on a day there is writing to do', async () => {
+  const wed = await buildLesson({ now: WED, table: null });
+  const tue = await buildLesson({ now: TUE, table: null });
+  const has = (l) => l.replyMarkup.inline_keyboard.flat().some((b) => b.callback_data === 'write');
+
+  assert.ok(has(wed), 'Wednesday is a writing day');
+  assert.ok(!has(tue), 'Tuesday is not');
 });
 
 test('a technical concept is set as something to explain, not a sentence to read', async () => {

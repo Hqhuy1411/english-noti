@@ -122,6 +122,18 @@
       "Effect": "Allow",
       "Action": "dynamodb:ListTables",
       "Resource": "*"
+    },
+    {
+      "Sid": "CoachWebhookApi",
+      "Effect": "Allow",
+      "Action": [
+        "apigateway:POST",
+        "apigateway:GET",
+        "apigateway:PATCH",
+        "apigateway:PUT",
+        "apigateway:DELETE"
+      ],
+      "Resource": "arn:aws:apigateway:ap-southeast-1::/apis*"
     }
   ]
 }

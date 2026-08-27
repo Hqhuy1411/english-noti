@@ -262,6 +262,27 @@ function render({ now, environment, mode, review, fresh, task, writing, hints = 
 }
 
 /**
+ * The buttons under the lesson.
+ *
+ * `callback_data` is what comes back to the coach service, so these strings are
+ * a wire contract with services/coach/src/handler.mjs -- renaming one here
+ * silently breaks a button there.
+ */
+function keyboard(task, writing) {
+  const row = [{ text: '🎤 Nói', callback_data: 'speak' }];
+  if (writing) row.push({ text: '📝 Viết', callback_data: 'write' });
+  return {
+    inline_keyboard: [
+      row,
+      [
+        { text: '📖 Thêm ví dụ', callback_data: 'examples' },
+        { text: '😴 Bỏ qua hôm nay', callback_data: 'skip' },
+      ],
+    ],
+  };
+}
+
+/**
  * Build today's lesson.
  *
  * @returns `{ text, replyMarkup, lessonId }`. `replyMarkup` is null until the
@@ -345,5 +366,5 @@ export async function buildLesson({
     }
   }
 
-  return { text, replyMarkup: null, lessonId };
+  return { text, replyMarkup: keyboard(task, writing), lessonId };
 }

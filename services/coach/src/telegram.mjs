@@ -1,12 +1,14 @@
 /**
- * Minimal Telegram Bot API client.
+ * Telegram Bot API client for the coach.
  *
- * Zero dependencies: uses the global `fetch` built into Node 18+ (Lambda's
- * nodejs22.x runtime included).
+ * A deliberate copy of the notifier's client, not a shared module: the two
+ * services are separate nested stacks with their own CodeUri, so sharing would
+ * mean a Lambda layer, and a layer needs a package.json for Node to resolve a
+ * bare specifier -- which collides with ADR 0001. Sixty lines duplicated is the
+ * cheaper trade, and the coach needs methods the notifier never calls.
  *
- * The bot token is part of the request URL, so error messages here are built
- * from the method name only -- never from the URL -- to keep the token out of
- * logs and stack traces.
+ * The token is part of the request URL, so errors are built from the method name
+ * only -- never from the URL. The token-leak tests apply to this copy too.
  */
 
 const API_ROOT = 'https://api.telegram.org';
@@ -23,10 +25,6 @@ export class TelegramError extends Error {
   }
 }
 
-/**
- * Call a Bot API method and return its `result` payload.
- * Throws TelegramError on transport failure, non-2xx, or `ok: false`.
- */
 async function call(token, method, body) {
   let response;
   try {
@@ -37,11 +35,9 @@ async function call(token, method, body) {
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
   } catch (cause) {
-    // Covers DNS failure, connection reset, and the AbortSignal timeout.
     throw new TelegramError(method, { description: `network error: ${cause.message}` });
   }
 
-  // Telegram returns a JSON body on errors too, so parse before checking status.
   const payload = await response.json().catch(() => null);
 
   if (!response.ok || !payload?.ok) {
@@ -55,14 +51,6 @@ async function call(token, method, body) {
   return payload.result;
 }
 
-/**
- * Send a message. Returns the Telegram Message object.
- *
- * `replyMarkup` is the inline keyboard, added for the coach service (ADR 0009,
- * backlog 0003). When it is omitted the request body is byte-identical to what
- * this function sent before it existed -- there is a test pinning that, because
- * the alternative is a silent change to every message the notifier has ever sent.
- */
 export const sendMessage = (token, chatId, text, replyMarkup) =>
   call(token, 'sendMessage', {
     chat_id: chatId,
@@ -72,5 +60,19 @@ export const sendMessage = (token, chatId, text, replyMarkup) =>
     ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
   });
 
-/** Fetch pending updates -- used once at setup time to discover your chat id. */
-export const getUpdates = (token) => call(token, 'getUpdates', { limit: 100 });
+/**
+ * Acknowledge a button press. Telegram shows a spinner on the button until this
+ * is called, so skipping it makes a working bot look hung.
+ */
+export const answerCallbackQuery = (token, callbackQueryId, text) =>
+  call(token, 'answerCallbackQuery', {
+    callback_query_id: callbackQueryId,
+    ...(text ? { text } : {}),
+  });
+
+/** Resolve a file_id to a download path. The path is valid for about an hour. */
+export const getFile = (token, fileId) => call(token, 'getFile', { file_id: fileId });
+
+/** "typing" / "record_voice" indicator, so a slow reply does not look dead. */
+export const sendChatAction = (token, chatId, action = 'typing') =>
+  call(token, 'sendChatAction', { chat_id: chatId, action });

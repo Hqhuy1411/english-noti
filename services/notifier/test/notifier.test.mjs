@@ -97,6 +97,32 @@ test('sendMessage posts chat_id and text to the sendMessage method', async () =>
   assert.equal(calls[0].body.text, 'hello');
 });
 
+test('omitting the keyboard leaves the request body exactly as it always was', async () => {
+  const calls = [];
+  await withFetch(okFetch((c) => calls.push(c)), async () => {
+    await sendMessage(TOKEN, '999', 'hello');
+  });
+
+  // Pinned deliberately: adding the fourth parameter must not have changed what
+  // every message sent before it looked like on the wire.
+  assert.deepEqual(calls[0].body, {
+    chat_id: '999',
+    text: 'hello',
+    parse_mode: 'HTML',
+    disable_web_page_preview: true,
+  });
+});
+
+test('a keyboard is passed through as reply_markup when there is one', async () => {
+  const markup = { inline_keyboard: [[{ text: 'x', callback_data: 'y' }]] };
+  const calls = [];
+  await withFetch(okFetch((c) => calls.push(c)), async () => {
+    await sendMessage(TOKEN, '999', 'hello', markup);
+  });
+
+  assert.deepEqual(calls[0].body.reply_markup, markup);
+});
+
 test('the token travels in the URL and never in the request body', async () => {
   const calls = [];
   await withFetch(okFetch((c) => calls.push(c)), () => sendMessage(TOKEN, '1', 'x'));

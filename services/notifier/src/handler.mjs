@@ -27,7 +27,7 @@ export const handler = async (event, context) => {
   try {
     const [token, chatId] = [await getBotToken(), getChatId()];
     const lesson = await buildLesson();
-    const message = await sendMessage(token, chatId, lesson.text);
+    const message = await sendMessage(token, chatId, lesson.text, lesson.replyMarkup);
 
     log.info('send.success', {
       requestId,

@@ -96,8 +96,13 @@ Why each block is needed:
 | `ssm:DescribeParameters` | Listing is an account-level action and cannot be scoped to a path, hence `Resource: "*"`. |
 | `dynamodb:*` on `table/english-reminder-study` | Creating and updating the study table. `DescribeTable`, `DescribeTimeToLive` and `DescribeContinuousBackups` are **read-backs**, not extras: CloudFormation reads a resource after creating it, so without them the create succeeds and the stack still fails -- the same trap `scheduler:GetSchedule` caused, described in `docs/DEPLOY-LOG.md`. |
 
+| `apigateway:*` on `/apis*` | Creating the coach service's HTTP API webhook. On this account it is already covered by `AmazonAPIGatewayAdministrator`, attached via the `group-noti` IAM group -- listed here so a least-privilege rebuild does not miss it. |
+
 CloudFormation, Lambda, Logs, IAM role creation and EventBridge Scheduler
-permissions are assumed already present.
+permissions are assumed already present. On this account they come from the
+`group-noti` group (`AWSCloudFormationFullAccess`, `AWSLambda_FullAccess`), not
+from the user directly -- worth knowing before concluding a permission is absent
+because `list-attached-user-policies` does not show it.
 
 ### Checking a permission without guessing
 

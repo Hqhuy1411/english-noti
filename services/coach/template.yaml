@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Coach service -- the reply channel.
+
+  Receives Telegram updates on an HTTP API webhook: button presses, written
+  answers, and voice notes. Deployed once, not once per environment: there is one
+  bot and Telegram allows it one webhook URL, so an EnvironmentName suffix here
+  would buy nothing and cost a second URL nobody can point at.
+
+  Authentication is the secret_token header Telegram echoes back, checked against
+  a SecureString, plus a single-chat allowlist. A rejected update still answers
+  200 -- see the handler for why a 401 would be worse.
+
+Parameters:
+  TelegramChatId:
+    Type: String
+    Description: The only chat allowed to reach this webhook. Not a secret.
+
+  StudyTableName:
+    Type: String
+    Description: Study table, used here for update_id de-duplication records.
+
+  LogRetentionDays:
+    Type: Number
+    Default: 30
+    Description: CloudWatch Logs retention, in days.
+
+  TokenParameterName:
+    Type: String
+    Default: /english-reminder/telegram-bot-token
+    Description: SSM SecureString holding the bot token, created out-of-band.
+
+  WebhookSecretParameterName:
+    Type: String
+    Default: /english-reminder/telegram-webhook-secret
+    Description: >
+      SSM SecureString holding the secret_token Telegram sends back on every
+      webhook request. Created out-of-band for the same reason as the bot token:
+      CloudFormation cannot express a SecureString (ADR 0004).
+
+Resources:
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/english-reminder-coach
+      RetentionInDays: !Ref LogRetentionDays
+
+  ReplyApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: live
+      # No auth here on purpose: the secret_token header is checked inside the
+      # function, because a rejected request must still answer 200.
+      DefinitionBody:
+        openapi: 3.0.1
+        info:
+          title: english-reminder coach webhook
+          version: '1.0'
+        paths:
+          /telegram:
+            post:
+              responses:
+                default:
+                  description: Always 200 -- Telegram retries anything else.
+              x-amazon-apigateway-integration:
+                type: aws_proxy
+                httpMethod: POST
+                payloadFormatVersion: '2.0'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IngestFunction.Arn}/invocations
+
+  IngestFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: LogGroup
+    Properties:
+      FunctionName: english-reminder-coach
+      Description: Receives Telegram updates -- buttons, text and voice notes.
+      CodeUri: src/
+      Handler: handler.handler
+      Runtime: nodejs22.x
+      Architectures:
+        - arm64
+      # Telegram's delivery window is short. This function authenticates,
+      # de-duplicates and acknowledges; nothing here should approach 10s.
+      Timeout: 10
+      MemorySize: 256
+      Environment:
+        Variables:
+          TELEGRAM_CHAT_ID: !Ref TelegramChatId
+          SSM_TOKEN_PARAM: !Ref TokenParameterName
+          SSM_WEBHOOK_SECRET_PARAM: !Ref WebhookSecretParameterName
+          STUDY_TABLE: !Ref StudyTableName
+      Policies:
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: /english-reminder/*
+        - DynamoDBCrudPolicy:
+            TableName: !Ref StudyTableName
+      Events:
+        Webhook:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ReplyApi
+            Path: /telegram
+            Method: POST
+
+Outputs:
+  WebhookUrl:
+    Description: >
+      Point Telegram at this with services/coach/scripts/set-webhook.mjs.
+      Knowing the URL is not enough to use it -- the secret_token header is.
+    Value: !Sub https://${ReplyApi}.execute-api.${AWS::Region}.amazonaws.com/live/telegram
+
+  FunctionName:
+    Description: Coach function name.
+    Value: !Ref IngestFunction
+
+  LogGroupName:
+    Description: CloudWatch log group for inbound updates.
+    Value: !Ref LogGroup
