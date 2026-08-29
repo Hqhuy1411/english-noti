@@ -134,6 +134,22 @@
         "apigateway:DELETE"
       ],
       "Resource": "arn:aws:apigateway:ap-southeast-1::/apis*"
+    },
+    {
+      "Sid": "CoachEventRules",
+      "Effect": "Allow",
+      "Action": [
+        "events:PutRule",
+        "events:DescribeRule",
+        "events:DeleteRule",
+        "events:PutTargets",
+        "events:RemoveTargets",
+        "events:ListTargetsByRule",
+        "events:TagResource",
+        "events:UntagResource",
+        "events:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:events:ap-southeast-1:ACCOUNT_ID:rule/english-reminder-*"
     }
   ]
 }

@@ -96,6 +96,10 @@ Resources:
         LogRetentionDays: !Ref LogRetentionDays
 
 Outputs:
+  AudioBucketName:
+    Description: Voice notes and transcripts, expired after thirty days.
+    Value: !GetAtt Coach.Outputs.AudioBucketName
+
   WebhookUrl:
     Description: Telegram webhook endpoint -- pass to scripts/set-webhook.mjs.
     Value: !GetAtt Coach.Outputs.WebhookUrl

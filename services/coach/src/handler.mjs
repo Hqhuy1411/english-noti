@@ -19,8 +19,9 @@
  */
 
 import { getBotToken, getWebhookSecret, getAllowedChatId } from './config.mjs';
-import { sendMessage, answerCallbackQuery } from './telegram.mjs';
+import { sendMessage, answerCallbackQuery, getFile } from './telegram.mjs';
 import { putItem } from './ddb.mjs';
+import { jobName, downloadVoice, putObject, startTranscription } from './audio.mjs';
 import * as log from './logger.mjs';
 
 const OK = { statusCode: 200, body: '' };
@@ -120,13 +121,7 @@ export const handler = async (event) => {
     if (update.callback_query) {
       await handleButton(token, table, chatId, update.callback_query);
     } else if (update.message?.voice) {
-      // Ticket 0004 turns this into a transcription job. Acknowledging now
-      // means the learner is never left wondering whether it arrived.
-      log.info('submission.voice', {
-        updateId: update.update_id,
-        durationSeconds: update.message.voice.duration,
-      });
-      await sendMessage(token, chatId, '🎧 Đã nhận voice note. Chấm bài sẽ có ở bước sau.');
+      await handleVoice(token, chatId, update);
     } else if (update.message?.text) {
       log.info('submission.text', {
         updateId: update.update_id,
@@ -165,4 +160,51 @@ async function handleButton(token, table, chatId, callbackQuery) {
 
   log.info('button.pressed', { action });
   await sendMessage(token, chatId, replies[action] ?? 'Chưa hiểu nút này.');
+}
+
+/**
+ * Take a voice note off Telegram and hand it to Transcribe.
+ *
+ * The acknowledgement is sent before the slow part, not after: Telegram's
+ * delivery window is short, and a learner who sees nothing assumes the recording
+ * was lost and records it again.
+ */
+async function handleVoice(token, chatId, update) {
+  const { voice } = update.message;
+  log.info('submission.voice', {
+    updateId: update.update_id,
+    durationSeconds: voice.duration,
+  });
+  await sendMessage(token, chatId, '🎧 Đang nghe... phản hồi sẽ tới trong khoảng một phút.');
+
+  const bucket = process.env.AUDIO_BUCKET;
+  if (!bucket) {
+    log.error('submission.voice.unconfigured', { reason: 'AUDIO_BUCKET is not set' });
+    return;
+  }
+
+  const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date());
+  const name = jobName({
+    environment: process.env.ENVIRONMENT ?? 'prod',
+    chatId,
+    date,
+    updateId: update.update_id,
+  });
+
+  const file = await getFile(token, voice.file_id);
+  const bytes = await downloadVoice(token, file.file_path);
+  const mediaUri = await putObject(bucket, `voice/${name}.ogg`, bytes, 'audio/ogg');
+
+  await putItem(process.env.STUDY_TABLE, {
+    PK: `USER#${chatId}`,
+    SK: `SUB#${new Date().toISOString()}`,
+    kind: 'voice',
+    jobName: name,
+    date,
+    durationSeconds: voice.duration ?? 0,
+    updateId: update.update_id,
+  });
+
+  await startTranscription({ name, mediaUri, bucket });
+  log.info('transcription.started', { jobName: name, durationSeconds: voice.duration });
 }

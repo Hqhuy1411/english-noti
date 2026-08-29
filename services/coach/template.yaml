@@ -40,6 +40,29 @@ Parameters:
       CloudFormation cannot express a SecureString (ADR 0004).
 
 Resources:
+  # Voice notes land here on the way to Transcribe, and the transcripts come back
+  # to the same bucket. Nothing here is worth keeping: the transcript is copied
+  # into the study table, and the audio has served its purpose once it is read.
+  AudioBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !Sub english-reminder-audio-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-recordings
+            Status: Enabled
+            ExpirationInDays: 30
+
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -90,11 +113,21 @@ Resources:
           SSM_TOKEN_PARAM: !Ref TokenParameterName
           SSM_WEBHOOK_SECRET_PARAM: !Ref WebhookSecretParameterName
           STUDY_TABLE: !Ref StudyTableName
+          AUDIO_BUCKET: !Ref AudioBucket
       Policies:
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName: /english-reminder/*
         - DynamoDBCrudPolicy:
             TableName: !Ref StudyTableName
+        - S3CrudPolicy:
+            BucketName: !Sub english-reminder-audio-${AWS::AccountId}
+        - Statement:
+            - Effect: Allow
+              Action:
+                - transcribe:StartTranscriptionJob
+              # Transcribe job names are not ARNs that can be scoped ahead of
+              # time; the bucket policy above is the real boundary.
+              Resource: '*'
       Events:
         Webhook:
           Type: HttpApi
@@ -103,7 +136,67 @@ Resources:
             Path: /telegram
             Method: POST
 
+  GradeLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/english-reminder-coach-grade
+      RetentionInDays: !Ref LogRetentionDays
+
+  # Woken by Transcribe finishing, not by polling. The job name carries the
+  # chat, the date and the update id, because that event is the only context
+  # this function gets.
+  GradeFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: GradeLogGroup
+    Properties:
+      FunctionName: english-reminder-coach-grade
+      Description: Turns a finished transcript into feedback and an SRS update.
+      CodeUri: src/
+      Handler: grade.handler
+      Runtime: nodejs22.x
+      Architectures:
+        - arm64
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          TELEGRAM_CHAT_ID: !Ref TelegramChatId
+          SSM_TOKEN_PARAM: !Ref TokenParameterName
+          STUDY_TABLE: !Ref StudyTableName
+          AUDIO_BUCKET: !Ref AudioBucket
+      Policies:
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: /english-reminder/*
+        - DynamoDBCrudPolicy:
+            TableName: !Ref StudyTableName
+        - S3CrudPolicy:
+            BucketName: !Sub english-reminder-audio-${AWS::AccountId}
+        - Statement:
+            - Effect: Allow
+              Action:
+                - transcribe:GetTranscriptionJob
+              Resource: '*'
+      Events:
+        TranscribeFinished:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.transcribe
+              detail-type:
+                - Transcribe Job State Change
+              detail:
+                # FAILED is included deliberately: silence on failure is
+                # indistinguishable from a job still running.
+                TranscriptionJobStatus:
+                  - COMPLETED
+                  - FAILED
+
 Outputs:
+  AudioBucketName:
+    Description: Where voice notes and transcripts live for thirty days.
+    Value: !Ref AudioBucket
+
   WebhookUrl:
     Description: >
       Point Telegram at this with services/coach/scripts/set-webhook.mjs.

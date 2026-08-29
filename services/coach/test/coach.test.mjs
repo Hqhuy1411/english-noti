@@ -120,13 +120,25 @@ test('a written answer is acknowledged', async () => {
   assert.match(calls[0].body.text, /Đã nhận bài viết/);
 });
 
-test('a voice note is acknowledged, so it is never silently swallowed', async () => {
+test('a voice note is acknowledged before the slow work, not after', async () => {
   const update = {
     update_id: 4,
     message: { chat: { id: Number(CHAT) }, voice: { file_id: 'abc', duration: 42 } },
   };
   const { result } = await captureLogs(() => withFetch(() => handler(request(update))));
-  assert.match(result.calls[0].body.text, /Đã nhận voice note/);
+
+  // Telegram's delivery window is short and a learner who sees nothing assumes
+  // the recording was lost and records it again.
+  assert.match(result.calls[0].body.text, /Đang nghe/);
+});
+
+test('a voice note with no bucket configured says so loudly instead of failing quietly', async () => {
+  const update = {
+    update_id: 7,
+    message: { chat: { id: Number(CHAT) }, voice: { file_id: 'abc', duration: 12 } },
+  };
+  const { logs } = await captureLogs(() => withFetch(() => handler(request(update))));
+  assert.match(logs, /submission\.voice\.unconfigured/);
 });
 
 test('a button press is acknowledged before anything else, or it spins', async () => {
